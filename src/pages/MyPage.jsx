@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { logout } from "../api/auth";
+import { useState, useEffect } from "react";
+import { logout, getMyInfo, updateMyInfo, changePassword } from "../api/auth";
 import { styles } from "../App";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { getHistoryList, deleteHistory, deleteAllHistory } from "../api/history";
 
 export default function MyPage({ setPage, user, setUser, history, setHistory, setResult, setFromHistory }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -11,11 +12,111 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
-  const handleSave = () => {
+  useEffect(() => {
+    const fetchMyInfo = async () => {
+      try {
+        const response = await getMyInfo();
+        const data = await response.json();
+        console.log("myInfo:", data);
+        const info = data.data || data;
+        if (response.ok) {
+          setUser({ name: info.name, email: info.email, phone: info.phone || "" });
+          setEditForm({ name: info.name, email: info.email, phone: info.phone || "" });
+        }
+      } catch (e) {
+        console.error("내 정보 조회 실패:", e);
+      }
+    };
+
+    const fetchHistory = async () => {
+      try {
+        const response = await getHistoryList();
+        const data = await response.json();
+        console.log("historyData:", data);
+        if (response.ok && data.data?.logs) {
+          setHistory(data.data.logs.map((h) => ({
+            id: h.id,
+            address: h.address || "주소 없음",
+            date: new Date(h.createdAt).toLocaleDateString(),
+            result: h.riskLevel === "HIGH" ? "위험 · 주차 불가" : h.riskLevel === "MEDIUM" ? "주의 · 주차 가능" : "주차 가능",
+            type: h.riskLevel === "HIGH" ? "danger" : h.riskLevel === "MEDIUM" ? "warning" : "safe",
+            probability: h.probability,
+            time: "-",
+            zone: "-",
+            line: "-",
+          })));
+        }
+      } catch (e) {
+        console.error("분석 이력 조회 실패:", e);
+      }
+    };
+
+    fetchMyInfo();
+    fetchHistory();
+  }, []);
+
+  const handleDeleteHistory = async (historyId, idx) => {
+    try {
+      const response = await deleteHistory(historyId);
+      if (response.ok) {
+        setHistory(history.filter((_, i) => i !== idx));
+      } else {
+        alert("삭제 실패");
+      }
+    } catch (e) {
+      alert("서버 연결 실패");
+    }
+  };
+
+  const handleDeleteAllHistory = async () => {
+    try {
+      const response = await deleteAllHistory();
+      if (response.ok) {
+        setHistory([]);
+      } else {
+        alert("전체 삭제 실패");
+      }
+    } catch (e) {
+      alert("서버 연결 실패");
+    }
+  };
+
+  const handleSave = async () => {
     if (!editForm.name.trim()) return alert("이름을 입력해주세요");
     if (!editForm.email.trim()) return alert("이메일을 입력해주세요");
     if (!editForm.phone.trim()) return alert("전화번호를 입력해주세요");
-    setUser({ ...user, ...editForm });
+
+    try {
+      const response = await updateMyInfo({
+        name: editForm.name,
+        email: editForm.email,
+        phone: editForm.phone,
+      });
+
+      if (response.ok) {
+        setUser({ ...user, ...editForm });
+        alert("정보가 수정되었습니다!");
+      } else {
+        alert("정보 수정 실패");
+      }
+    } catch (e) {
+      alert("서버 연결 실패");
+    }
+
+    if (currentPassword.trim() && newPassword.trim()) {
+      try {
+        const pwResponse = await changePassword(user.id, currentPassword, newPassword);
+        const pwData = await pwResponse.json();
+        if (pwResponse.ok) {
+          alert(pwData.message || "비밀번호가 변경되었습니다!");
+        } else {
+          alert(pwData.message || "비밀번호 변경 실패");
+        }
+      } catch (e) {
+        alert("비밀번호 변경 중 오류 발생");
+      }
+    }
+
     setCurrentPassword("");
     setNewPassword("");
     setIsEditing(false);
@@ -30,6 +131,8 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
 
   const handleLogout = async () => {
     await logout();
+    setUser(null);
+    setHistory([]);
     setPage("login");
   };
 
@@ -150,7 +253,7 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
               }}>
                 상세 조회
               </button>
-              <button style={styles.deleteBtn} onClick={() => setHistory(history.filter((_, idx) => idx !== i))}>
+              <button style={styles.deleteBtn} onClick={() => handleDeleteHistory(h.id, i)}>
                 삭제
               </button>
             </div>
@@ -158,7 +261,7 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
         ))}
 
         {history.length > 0 && (
-          <button style={styles.allDeleteBtn} onClick={() => setHistory([])}>전체 삭제</button>
+          <button style={styles.allDeleteBtn} onClick={handleDeleteAllHistory}>전체 삭제</button>
         )}
       </div>
 

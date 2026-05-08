@@ -14,22 +14,22 @@ export default function Login({ setPage, setUser }) {
     if (!password.trim()) return alert("비밀번호를 입력해주세요");
 
     try {
-      const response = await login(username, password);
-      const data = await response.json();
+      const result = await login(username, password);
 
-      if (response.ok) {
-        localStorage.setItem("accessToken", data.data.accessToken);
+      if (result.ok) {
+        // 유저 정보 세팅 (auth.js에서 받은 data 활용)
         setUser({
-          name: data.data.name,
-          email: data.data.email,
-          phone: data.data.phone || "",
+          name: result.data?.data?.name || "",
+          email: result.data?.data?.email || "",
+          phone: result.data?.data?.phone || "",
           password: "",
         });
         setPage("main");
       } else {
-        alert(data.message || "아이디 또는 비밀번호가 틀렸습니다");
+        alert("로그인 실패: " + (result.data?.message || "아이디/비밀번호 확인"));
       }
     } catch (e) {
+      console.error("로그인 에러:", e);
       alert("서버 연결 실패");
     }
   };

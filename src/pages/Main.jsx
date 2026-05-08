@@ -1,11 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { styles } from "../App";
-
-const parkingLots = [
-  { id: 1, name: "강남 공영주차장", type: "공영", distance: "180m", walkTime: "3분", price: 200 },
-  { id: 2, name: "테헤란로 민영주차장", type: "민영", distance: "320m", walkTime: "5분", price: 300 },
-  { id: 3, name: "선릉역 환승주차장", type: "공영", distance: "510m", walkTime: "8분", price: 400 },
-];
+import { getNearbyParkingLots, checkParking } from "../api/parking";
 
 const parkingStyles = {
   lotCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" },
@@ -22,6 +17,9 @@ const parkingStyles = {
 export default function Main({ setPage, history, setHistory, result, setResult, fromHistory, setFromHistory }) {
   const [image, setImage] = useState(null);
   const [address, setAddress] = useState("위치 불러오는 중...");
+  const [currentLat, setCurrentLat] = useState(null);
+  const [currentLng, setCurrentLng] = useState(null);
+  const [nearbyParking, setNearbyParking] = useState([]);
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -45,6 +43,9 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     const initMap = (lat, lng) => {
       const container = document.getElementById("map");
       if (!container) return;
+
+      setCurrentLat(lat);
+      setCurrentLng(lng);
 
       const moveLatLon = new window.kakao.maps.LatLng(lat, lng);
 
@@ -88,23 +89,42 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     setImage(URL.createObjectURL(file));
   };
 
-  const handleAnalyze = () => {
-    const random = Math.random();
-    let newResult;
+  const handleAnalyze = async () => {
+    const lat = currentLat || 37.5665;
+    const lng = currentLng || 126.9780;
 
-    if (random < 0.33) {
-      newResult = { probability: 85, status: "위험 · 주차 불가", type: "danger", line: "황색 실선 감지됨", time: "07:00 - 22:00 단속", zone: "버스정류소 10m 이내" };
-    } else if (random < 0.66) {
-      newResult = { probability: 50, status: "주의 · 주차 가능", type: "warning", line: "점선 감지됨", time: "단속 없음", zone: "주의 구역" };
-    } else {
-      newResult = { probability: 10, status: "주차 가능", type: "safe", line: "주차선 확인", time: "단속 없음", zone: "일반 구역" };
+    try {
+      const checkResponse = await checkParking(lat, lng);
+      const checkData = await checkResponse.json();
+      const data = checkData.data;
+
+      let newResult;
+      if (data.riskLevel === "HIGH") {
+        newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: data.reasoning, time: "07:00 - 22:00 단속", zone: "주정차 금지구역" };
+      } else if (data.riskLevel === "MEDIUM") {
+        newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: data.reasoning, time: "단속 없음", zone: "주의 구역" };
+      } else {
+        newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: data.reasoning, time: "단속 없음", zone: "일반 구역" };
+      }
+
+      setResult(newResult);
+      setHistory([
+        { address, date: new Date().toLocaleDateString(), result: newResult.status, type: newResult.type, probability: newResult.probability, time: newResult.time, zone: newResult.zone, line: newResult.line },
+        ...history,
+      ]);
+
+      const parkingResponse = await getNearbyParkingLots(lat, lng);
+      const parkingData = await parkingResponse.json();
+      if (Array.isArray(parkingData)) {
+        setNearbyParking(parkingData);
+      } else if (Array.isArray(parkingData.data)) {
+        setNearbyParking(parkingData.data);
+      }
+
+    } catch (e) {
+      console.error("분석 오류:", e);
+      alert("서버 연결 실패");
     }
-
-    setResult(newResult);
-    setHistory([
-      { address, date: new Date().toLocaleDateString(), result: newResult.status, type: newResult.type, probability: newResult.probability, time: newResult.time, zone: newResult.zone, line: newResult.line },
-      ...history,
-    ]);
   };
 
   return (
@@ -182,28 +202,28 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         </div>
       )}
 
-      {result && (
+      {result && nearbyParking.length > 0 && (
         <div style={{ ...styles.resultCard, marginTop: 12 }}>
           <div style={styles.title}>주변 주차장</div>
-          {parkingLots.map((lot) => (
+          {nearbyParking.map((lot) => (
             <div key={lot.id} style={parkingStyles.lotCard}>
               <div style={parkingStyles.lotLeft}>
                 <div style={parkingStyles.lotIcon}>P</div>
                 <div>
-                  <div style={parkingStyles.lotName}>{lot.name}</div>
-                  <div style={parkingStyles.lotInfo}>도보 {lot.walkTime} · {lot.distance}</div>
+                  <div style={parkingStyles.lotName}>{lot.lotName}</div>
+                  <div style={parkingStyles.lotInfo}>{(lot.distanceKm * 1000).toFixed(0)}m</div>
                   <div style={{
                     ...parkingStyles.lotBadge,
-                    background: lot.type === "공영" ? "rgba(79,142,247,0.15)" : "rgba(46,204,113,0.15)",
-                    color: lot.type === "공영" ? "#4F8EF7" : "#2ECC71",
-                    border: lot.type === "공영" ? "1px solid rgba(79,142,247,0.3)" : "1px solid rgba(46,204,113,0.3)",
+                    background: lot.freeYn ? "rgba(46,204,113,0.15)" : "rgba(79,142,247,0.15)",
+                    color: lot.freeYn ? "#2ECC71" : "#4F8EF7",
+                    border: lot.freeYn ? "1px solid rgba(46,204,113,0.3)" : "1px solid rgba(79,142,247,0.3)",
                   }}>
-                    {lot.type}
+                    {lot.freeYn ? "무료" : "유료"}
                   </div>
                 </div>
               </div>
               <div style={parkingStyles.lotPrice}>
-                <div style={parkingStyles.priceText}>{lot.price}원</div>
+                <div style={parkingStyles.priceText}>{lot.freeYn ? "무료" : `${lot.lotPrice}원`}</div>
                 <div style={parkingStyles.priceUnit}>/ 5분</div>
               </div>
             </div>
