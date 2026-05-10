@@ -107,13 +107,14 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         const uploadData = await uploadResponse.json();
         const data = uploadData.data;
 
+      
         if (data.riskLevel === "HIGH") {
-          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: data.lineColor || "업로드 된 사진 없음", time: "07:00 - 22:00 단속", zone: "주정차 금지구역" };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: "07:00 - 22:00", zone: data.reasoning };
         } else if (data.riskLevel === "MEDIUM") {
-          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: data.lineColor || "업로드 된 사진 없음", time: "단속 없음", zone: "주의 구역" };
+          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: "일부 시간대 단속", zone: data.reasoning };
         } else {
-          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: data.lineColor || "업로드 된 사진 없음", time: "단속 없음", zone: "일반 구역" };
-        }
+          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: "단속 없음", zone: data.reasoning };
+        }        
       } else {
         // 이미지 없으면 위치 기반 분석
         const checkResponse = await checkParking(lat, lng);
