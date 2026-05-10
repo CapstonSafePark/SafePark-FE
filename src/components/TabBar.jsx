@@ -4,7 +4,7 @@ export default function TabBar({ page, setPage }) {
   const tabs = [
     { id: "main", label: "홈", icon: HiHome },
     { id: "history", label: "기록", icon: HiClipboardList },
-    { id: "mypage", label: "내 정보", icon: HiUser },
+    { id: "mypage", label: "마이", icon: HiUser },
   ];
 
   return (

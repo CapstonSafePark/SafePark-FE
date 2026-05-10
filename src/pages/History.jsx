@@ -80,7 +80,7 @@ export default function History({ setPage, history, setHistory, setResult }) {
       </div>
 
       <div style={styles.resultCard}>
-        <div style={styles.title}>분석 기록</div>
+        <div style={styles.title}>분석 이력</div>
 
         {history.length === 0 && (
           <div style={styles.emptyText}>분석 기록이 없습니다.</div>
