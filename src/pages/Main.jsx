@@ -22,6 +22,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   const [currentLat, setCurrentLat] = useState(null);
   const [currentLng, setCurrentLng] = useState(null);
   const [nearbyParking, setNearbyParking] = useState([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -94,6 +95,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   };
 
   const handleAnalyze = async () => {
+    setIsAnalyzing(true);
     console.log("분석 시작", imageFile, currentLat, currentLng);
     const lat = currentLat || 37.5665;
     const lng = currentLng || 126.9780;
@@ -147,6 +149,8 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     } catch (e) {
       console.error("분석 오류:", e);
       alert("서버 연결 실패");
+    } finally {
+      setIsAnalyzing(false);
     }
   };
   return (
@@ -175,7 +179,9 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
       {image && <img src={image} alt="preview" style={{ width: "100%", borderRadius: 10, marginBottom: 12 }} />}
 
-      <button style={styles.button} onClick={handleAnalyze}>여기 주차해도 되나요?</button>
+      <button style={styles.button} onClick={handleAnalyze} disabled={isAnalyzing}>
+        {isAnalyzing ? "분석 중..." : "여기 주차해도 되나요?"}
+      </button>
 
       {result && (
         <div style={styles.resultCard}>

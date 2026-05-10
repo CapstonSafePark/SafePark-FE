@@ -17,16 +17,15 @@ export default function Login({ setPage, setUser }) {
       const result = await login(username, password);
 
       if (result.ok) {
-        // 유저 정보 세팅 (auth.js에서 받은 data 활용)
         setUser({
+          id: result.data?.data?.userId,
           name: result.data?.data?.name || "",
           email: result.data?.data?.email || "",
           phone: result.data?.data?.phone || "",
-          password: "",
         });
         setPage("main");
       } else {
-        alert("로그인 실패: " + (result.data?.message || "아이디/비밀번호 확인"));
+        alert("아이디 또는 비밀번호가 올바르지 않습니다.");
       }
     } catch (e) {
       console.error("로그인 에러:", e);
