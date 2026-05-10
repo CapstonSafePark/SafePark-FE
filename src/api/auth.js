@@ -100,3 +100,16 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
   });
   return response;
 };
+
+// 회원 탈퇴
+export const deleteAccount = async (userId) => {
+  const token = localStorage.getItem("accessToken");
+  const response = await fetch(`${BASE_URL}/api/users/me?userId=${userId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response;
+};

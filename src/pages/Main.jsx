@@ -183,7 +183,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
             <div style={styles.probText}>단속 걸릴 확률</div>
           </div>
 
-          <div style={styles.subCard}>{address}</div>
+          <div style={styles.subCard}>{result.address || address}</div>
 
           <div style={styles.detailWrap}>
             <div style={styles.redCard}>
@@ -196,7 +196,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
             </div>
             <div style={styles.yellowCard}>
               <div style={styles.label}>주차선 판독</div>
-              <div style={styles.yellowText}>{result.line}</div>
+              <div style={styles.yellowText}>{result.line || "업로드 된 사진 없음"}</div>
             </div>
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                 <div style={parkingStyles.lotIcon}>P</div>
                 <div>
                   <div style={parkingStyles.lotName}>{lot.lotName}</div>
-                  <div style={parkingStyles.lotInfo}>{(lot.distanceKm * 1000).toFixed(0)}m</div>
+                  <div style={parkingStyles.lotInfo}>{lot.distanceKm ? (lot.distanceKm * 1000).toFixed(0) + "m" : "거리 정보 없음"}</div>
                   <div style={{
                     ...parkingStyles.lotBadge,
                     background: lot.freeYn ? "rgba(46,204,113,0.15)" : "rgba(79,142,247,0.15)",
@@ -223,7 +223,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                 </div>
               </div>
               <div style={parkingStyles.lotPrice}>
-                <div style={parkingStyles.priceText}>{lot.freeYn ? "무료" : `${lot.lotPrice}원`}</div>
+                <div style={parkingStyles.priceText}>{lot.freeYn ? "무료" : lot.lotPrice ? `${lot.lotPrice}원` : "요금 정보 없음"}</div>
                 <div style={parkingStyles.priceUnit}>/ 5분</div>
               </div>
             </div>

@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Main from "./pages/Main";
 import MyPage from "./pages/MyPage";
+import HistoryDetail from "./pages/HistoryDetail";
 
 export default function App() {
   const [page, setPage] = useState("login");
@@ -26,6 +27,9 @@ export default function App() {
             fromHistory={fromHistory}
             setFromHistory={setFromHistory}
           />
+        )}
+        {page === "historyDetail" && (
+         <HistoryDetail setPage={setPage} result={result} />
         )}
         {page === "mypage" && (
           <MyPage

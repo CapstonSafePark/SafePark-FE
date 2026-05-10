@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { logout, getMyInfo, updateMyInfo, changePassword } from "../api/auth";
+import { logout, getMyInfo, updateMyInfo, changePassword, deleteAccount } from "../api/auth";
 import { styles } from "../App";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { getHistoryList, deleteHistory, deleteAllHistory } from "../api/history";
@@ -34,17 +34,34 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
         const data = await response.json();
         console.log("historyData:", data);
         if (response.ok && data.data?.logs) {
-          setHistory(data.data.logs.map((h) => ({
-            id: h.id,
-            address: h.address || "주소 없음",
-            date: new Date(h.createdAt).toLocaleDateString(),
-            result: h.riskLevel === "HIGH" ? "위험 · 주차 불가" : h.riskLevel === "MEDIUM" ? "주의 · 주차 가능" : "주차 가능",
-            type: h.riskLevel === "HIGH" ? "danger" : h.riskLevel === "MEDIUM" ? "warning" : "safe",
-            probability: h.probability,
-            time: "-",
-            zone: "-",
-            line: "-",
-          })));
+          const geocoder = new window.kakao.maps.services.Geocoder();
+
+          const logsWithAddress = await Promise.all(
+            data.data.logs.map((h) =>
+              new Promise((resolve) => {
+                geocoder.coord2Address(h.reqLng, h.reqLat, (res, status) => {
+                  const address = status === window.kakao.maps.services.Status.OK
+                    ? res[0].address.address_name
+                    : "주소 없음";
+                  const createdAt = new Date(h.createdAt + "Z");
+                  resolve({
+                    id: h.id,
+                    address,
+                    lat: h.reqLat,
+                    lng: h.reqLng,
+                    date: `${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`,
+                    result: h.riskLevel === "HIGH" ? "위험 · 주차 불가" : h.riskLevel === "MEDIUM" ? "주의 · 주차 가능" : "주차 가능",
+                    type: h.riskLevel === "HIGH" ? "danger" : h.riskLevel === "MEDIUM" ? "warning" : "safe",
+                    probability: h.probability,
+                    time: "-",
+                    zone: "-",
+                    line: "-",
+                  });
+                });
+              })
+            )
+          );
+          setHistory(logsWithAddress);
         }
       } catch (e) {
         console.error("분석 이력 조회 실패:", e);
@@ -135,6 +152,26 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
     setHistory([]);
     setPage("login");
   };
+
+const handleDeleteAccount = async () => {
+  if (!window.confirm("정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
+  try {
+    const response = await deleteAccount(user.id);
+    const data = await response.json();
+    if (response.ok) {
+      alert(data.message || "회원 탈퇴가 완료되었습니다.");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      setUser(null);
+      setHistory([]);
+      setPage("login");
+    } else {
+      alert("회원 탈퇴 실패");
+    }
+  } catch (e) {
+    alert("서버 연결 실패");
+  }
+};
 
   return (
     <>
@@ -247,9 +284,8 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
             </div>
             <div style={styles.historyBtnRow}>
               <button style={styles.detailBtn} onClick={() => {
-                setResult({ probability: h.probability, status: h.result, type: h.type, line: h.line, time: h.time, zone: h.zone });
-                setFromHistory(true);
-                setPage("main");
+                setResult({ probability: h.probability, status: h.result, type: h.type, line: h.line, time: h.time, zone: h.zone, address: h.address, lat: h.lat, lng: h.lng });
+                setPage("historyDetail");
               }}>
                 상세 조회
               </button>
@@ -271,7 +307,7 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
       <div style={styles.resultCard}>
         <div style={styles.title}>계정 관리</div>
         <button style={styles.smallBtn} onClick={handleLogout}>로그아웃</button>
-        <button style={styles.withdrawBtn}>회원 탈퇴</button>
+        <button style={styles.withdrawBtn} onClick={handleDeleteAccount}>회원 탈퇴</button>
       </div>
     </>
   );
