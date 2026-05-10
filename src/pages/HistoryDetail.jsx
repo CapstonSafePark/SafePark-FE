@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getNearbyParkingLots } from "../api/parking";
 import { styles } from "../App";
+import { HiArrowLeft } from "react-icons/hi";
 
 const parkingStyles = {
   lotCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" },
@@ -71,7 +72,7 @@ export default function HistoryDetail({ setPage, result }) {
           <span style={{ color: "#fff" }}>Safe</span>
           <span style={{ color: "#4F8EF7" }}>Park</span>
         </div>
-        <div style={styles.profileBtn} onClick={() => setPage("mypage")}>←</div>
+        <div style={styles.profileBtn} onClick={() => setPage("history")}><HiArrowLeft size={20} /></div>
       </div>
 
       <div id="detail-map" style={styles.map} />

@@ -155,7 +155,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           <span style={{ color: "#fff" }}>Safe</span>
           <span style={{ color: "#4F8EF7" }}>Park</span>
         </div>
-        <div style={styles.profileBtn} onClick={() => setPage("mypage")}>👤</div>
       </div>
 
       <div id="map" style={styles.map} />

@@ -106,7 +106,6 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
     <>
       <div style={styles.topbarRow}>
         <div style={styles.logoText}>마이페이지</div>
-        <div style={styles.profileBtn} onClick={() => setPage("main")}>←</div>
       </div>
 
       {/* 내 정보 */}
