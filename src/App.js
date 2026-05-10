@@ -4,6 +4,9 @@ import Register from "./pages/Register";
 import Main from "./pages/Main";
 import MyPage from "./pages/MyPage";
 import HistoryDetail from "./pages/HistoryDetail";
+import TabBar from "./components/TabBar";
+import History from "./pages/History";
+
 
 export default function App() {
   const [page, setPage] = useState("login");
@@ -28,6 +31,14 @@ export default function App() {
             setFromHistory={setFromHistory}
           />
         )}
+        {page === "history" && (
+          <History
+            setPage={setPage}
+            history={history}
+            setHistory={setHistory}
+            setResult={setResult}
+          />
+        )}
         {page === "historyDetail" && (
          <HistoryDetail setPage={setPage} result={result} />
         )}
@@ -41,6 +52,9 @@ export default function App() {
             setResult={setResult}
             setFromHistory={setFromHistory}
           />
+        )}
+        {page !== "login" && page !== "register" && (
+          <TabBar page={page} setPage={setPage} />
         )}
       </div>
     </div>

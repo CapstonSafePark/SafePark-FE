@@ -2,9 +2,8 @@ import { useState, useEffect } from "react";
 import { logout, getMyInfo, updateMyInfo, changePassword, deleteAccount } from "../api/auth";
 import { styles } from "../App";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { getHistoryList, deleteHistory, deleteAllHistory } from "../api/history";
 
-export default function MyPage({ setPage, user, setUser, history, setHistory, setResult, setFromHistory }) {
+export default function MyPage({ setPage, user, setUser, setHistory }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: user?.name || "", email: user?.email || "", phone: user?.phone || "" });
   const [currentPassword, setCurrentPassword] = useState("");
@@ -17,7 +16,6 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
       try {
         const response = await getMyInfo();
         const data = await response.json();
-        console.log("myInfo:", data);
         const info = data.data || data;
         if (response.ok) {
           setUser({ name: info.name, email: info.email, phone: info.phone || "" });
@@ -27,76 +25,8 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
         console.error("내 정보 조회 실패:", e);
       }
     };
-
-    const fetchHistory = async () => {
-      try {
-        const response = await getHistoryList();
-        const data = await response.json();
-        console.log("historyData:", data);
-        if (response.ok && data.data?.logs) {
-          const geocoder = new window.kakao.maps.services.Geocoder();
-
-          const logsWithAddress = await Promise.all(
-            data.data.logs.map((h) =>
-              new Promise((resolve) => {
-                geocoder.coord2Address(h.reqLng, h.reqLat, (res, status) => {
-                  const address = status === window.kakao.maps.services.Status.OK
-                    ? res[0].address.address_name
-                    : "주소 없음";
-                  const createdAt = new Date(h.createdAt + "Z");
-                  resolve({
-                    id: h.id,
-                    address,
-                    lat: h.reqLat,
-                    lng: h.reqLng,
-                    date: `${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`,
-                    result: h.riskLevel === "HIGH" ? "위험 · 주차 불가" : h.riskLevel === "MEDIUM" ? "주의 · 주차 가능" : "주차 가능",
-                    type: h.riskLevel === "HIGH" ? "danger" : h.riskLevel === "MEDIUM" ? "warning" : "safe",
-                    probability: h.probability,
-                    time: "-",
-                    zone: "-",
-                    line: "-",
-                  });
-                });
-              })
-            )
-          );
-          setHistory(logsWithAddress);
-        }
-      } catch (e) {
-        console.error("분석 이력 조회 실패:", e);
-      }
-    };
-
     fetchMyInfo();
-    fetchHistory();
   }, []);
-
-  const handleDeleteHistory = async (historyId, idx) => {
-    try {
-      const response = await deleteHistory(historyId);
-      if (response.ok) {
-        setHistory(history.filter((_, i) => i !== idx));
-      } else {
-        alert("삭제 실패");
-      }
-    } catch (e) {
-      alert("서버 연결 실패");
-    }
-  };
-
-  const handleDeleteAllHistory = async () => {
-    try {
-      const response = await deleteAllHistory();
-      if (response.ok) {
-        setHistory([]);
-      } else {
-        alert("전체 삭제 실패");
-      }
-    } catch (e) {
-      alert("서버 연결 실패");
-    }
-  };
 
   const handleSave = async () => {
     if (!editForm.name.trim()) return alert("이름을 입력해주세요");
@@ -109,7 +39,6 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
         email: editForm.email,
         phone: editForm.phone,
       });
-
       if (response.ok) {
         setUser({ ...user, ...editForm });
         alert("정보가 수정되었습니다!");
@@ -153,25 +82,25 @@ export default function MyPage({ setPage, user, setUser, history, setHistory, se
     setPage("login");
   };
 
-const handleDeleteAccount = async () => {
-  if (!window.confirm("정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
-  try {
-    const response = await deleteAccount(user.id);
-    const data = await response.json();
-    if (response.ok) {
-      alert(data.message || "회원 탈퇴가 완료되었습니다.");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      setUser(null);
-      setHistory([]);
-      setPage("login");
-    } else {
-      alert("회원 탈퇴 실패");
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("정말 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.")) return;
+    try {
+      const response = await deleteAccount(user.id);
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message || "회원 탈퇴가 완료되었습니다.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        setUser(null);
+        setHistory([]);
+        setPage("login");
+      } else {
+        alert("회원 탈퇴 실패");
+      }
+    } catch (e) {
+      alert("서버 연결 실패");
     }
-  } catch (e) {
-    alert("서버 연결 실패");
-  }
-};
+  };
 
   return (
     <>
@@ -267,48 +196,14 @@ const handleDeleteAccount = async () => {
 
       <div style={{ height: 12 }} />
 
-      {/* 분석 이력 */}
-      <div style={styles.resultCard}>
-        <div style={styles.title}>분석 이력</div>
-
-        {history.length === 0 && (
-          <div style={styles.emptyText}>분석 이력이 없습니다.</div>
-        )}
-
-        {history.map((h, i) => (
-          <div key={i} style={styles.historyCard}>
-            <div style={styles.historyDate}>{h.date}</div>
-            <div style={styles.historyAddress}>{h.address}</div>
-            <div style={{ ...styles.badge, ...(h.type === "danger" && styles.badgeDanger), ...(h.type === "warning" && styles.badgeWarning), ...(h.type === "safe" && styles.badgeSafe), marginTop: 8, width: "fit-content" }}>
-              {h.result}
-            </div>
-            <div style={styles.historyBtnRow}>
-              <button style={styles.detailBtn} onClick={() => {
-                setResult({ probability: h.probability, status: h.result, type: h.type, line: h.line, time: h.time, zone: h.zone, address: h.address, lat: h.lat, lng: h.lng });
-                setPage("historyDetail");
-              }}>
-                상세 조회
-              </button>
-              <button style={styles.deleteBtn} onClick={() => handleDeleteHistory(h.id, i)}>
-                삭제
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {history.length > 0 && (
-          <button style={styles.allDeleteBtn} onClick={handleDeleteAllHistory}>전체 삭제</button>
-        )}
-      </div>
-
-      <div style={{ height: 12 }} />
-
       {/* 계정 관리 */}
       <div style={styles.resultCard}>
         <div style={styles.title}>계정 관리</div>
         <button style={styles.smallBtn} onClick={handleLogout}>로그아웃</button>
         <button style={styles.withdrawBtn} onClick={handleDeleteAccount}>회원 탈퇴</button>
       </div>
+
+      <div style={{ height: 80 }} />
     </>
   );
 }

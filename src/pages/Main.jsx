@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { styles } from "../App";
 import { getNearbyParkingLots, checkParking } from "../api/parking";
+import { uploadImage } from "../api/analysis";
 
 const parkingStyles = {
   lotCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" },
@@ -16,6 +17,7 @@ const parkingStyles = {
 
 export default function Main({ setPage, history, setHistory, result, setResult, fromHistory, setFromHistory }) {
   const [image, setImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [address, setAddress] = useState("위치 불러오는 중...");
   const [currentLat, setCurrentLat] = useState(null);
   const [currentLng, setCurrentLng] = useState(null);
@@ -83,28 +85,48 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     };
   }, []);
 
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    setImageFile(file);
     setImage(URL.createObjectURL(file));
   };
 
   const handleAnalyze = async () => {
+    console.log("분석 시작", imageFile, currentLat, currentLng);
     const lat = currentLat || 37.5665;
     const lng = currentLng || 126.9780;
 
     try {
-      const checkResponse = await checkParking(lat, lng);
-      const checkData = await checkResponse.json();
-      const data = checkData.data;
-
       let newResult;
-      if (data.riskLevel === "HIGH") {
-        newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: data.reasoning, time: "07:00 - 22:00 단속", zone: "주정차 금지구역" };
-      } else if (data.riskLevel === "MEDIUM") {
-        newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: data.reasoning, time: "단속 없음", zone: "주의 구역" };
+
+      if (imageFile) {
+        // 이미지 있으면 이미지 분석 API 호출
+        const uploadResponse = await uploadImage(imageFile, lat, lng);
+        const uploadData = await uploadResponse.json();
+        const data = uploadData.data;
+
+        if (data.riskLevel === "HIGH") {
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: data.lineColor || "업로드 된 사진 없음", time: "07:00 - 22:00 단속", zone: "주정차 금지구역" };
+        } else if (data.riskLevel === "MEDIUM") {
+          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: data.lineColor || "업로드 된 사진 없음", time: "단속 없음", zone: "주의 구역" };
+        } else {
+          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: data.lineColor || "업로드 된 사진 없음", time: "단속 없음", zone: "일반 구역" };
+        }
       } else {
-        newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: data.reasoning, time: "단속 없음", zone: "일반 구역" };
+        // 이미지 없으면 위치 기반 분석
+        const checkResponse = await checkParking(lat, lng);
+        const checkData = await checkResponse.json();
+        const data = checkData.data;
+
+        if (data.riskLevel === "HIGH") {
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: "07:00 - 22:00 단속", zone: "주정차 금지구역" };
+        } else if (data.riskLevel === "MEDIUM") {
+          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: "단속 없음", zone: "주의 구역" };
+        } else {
+          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: "단속 없음", zone: "일반 구역" };
+        }
       }
 
       setResult(newResult);
@@ -126,7 +148,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       alert("서버 연결 실패");
     }
   };
-
   return (
     <>
       <div style={styles.topbarRow}>
