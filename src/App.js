@@ -63,7 +63,7 @@ export default function App() {
 
 export const styles = {
   wrapper: { width: "100vw", height: "100vh", display: "flex", justifyContent: "center", background: "#ffffff" },
-  frame: { width: "375px", height: "100vh", background: "#0D0D1A", padding: "16px", color: "#fff", fontFamily: "Noto Sans KR", position: "relative", overflowY: "auto" },
+  frame: { width: "375px", height: "100vh", background: "#0D0D1A", padding: "16px", paddingBottom: "80px", color: "#fff", fontFamily: "Noto Sans KR", position: "relative", overflowY: "auto" },
   topbar: { marginBottom: 10, fontWeight: 800, fontSize: 18 },
   topbarRow: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   logoText: { fontWeight: 800, fontSize: 18 },

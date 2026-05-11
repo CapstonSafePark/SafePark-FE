@@ -88,11 +88,51 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImageFile(file);
-    setImage(URL.createObjectURL(file));
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+
+  img.onload = () => {
+    const MAX_SIZE = 800;
+    let width = img.width;
+    let height = img.height;
+
+    if (width > height) {
+      if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+    } else {
+      if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    ctx.drawImage(img, 0, 0, width, height);
+
+    canvas.toBlob((blob) => {
+      const compressedFile = new File([blob], file.name, { type: "image/jpeg" });
+      setImageFile(compressedFile);
+      setImage(URL.createObjectURL(compressedFile));
+    }, "image/jpeg", 0.7);
   };
+
+  img.src = URL.createObjectURL(file);
+};
+
+  const formatReasoning = (reasoning) => {
+  if (!reasoning) return "-";
+  
+  // "반경 내 단속구역 없음" 또는 "단속구역 존재" 부분 추출
+  const zoneMatch = reasoning.match(/반경 내 단속구역 [^\.]*/);
+  const zone = zoneMatch ? zoneMatch[0] : "";
+  
+  // 과태료 확률 추출
+  const probMatch = reasoning.match(/과태료 확률: (\d+)%/);
+  const prob = probMatch ? `과태료 확률 ${probMatch[1]}%` : "";
+  
+  return [zone, prob].filter(Boolean).join(" / ");
+};
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
@@ -108,15 +148,21 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         const uploadResponse = await uploadImage(imageFile, lat, lng);
         const uploadData = await uploadResponse.json();
         const data = uploadData.data;
+        const lineColorMap = {
+          yellow_double: "황색 이중선",
+          yellow_single: "황색 단선",
+          yellow_dashed: "황색 점선",
+          none: "차선 감지 불가",
+        };
+        const lineText = data.lineColor ? (lineColorMap[data.lineColor] || data.lineColor) : null;
 
-      
         if (data.riskLevel === "HIGH") {
-          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: "07:00 - 22:00", zone: data.reasoning };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: lineText, time: "07:00 - 22:00", zone:  formatReasoning(data.reasoning) };
         } else if (data.riskLevel === "MEDIUM") {
-          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: "일부 시간대 단속", zone: data.reasoning };
+          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: lineText, time: "일부 시간대 단속", zone:  formatReasoning(data.reasoning) };
         } else {
-          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: "단속 없음", zone: data.reasoning };
-        }        
+          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: lineText, time: "단속 없음", zone:  formatReasoning(data.reasoning) };
+        }
       } else {
         // 이미지 없으면 위치 기반 분석
         const checkResponse = await checkParking(lat, lng);
@@ -124,11 +170,11 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         const data = checkData.data;
 
         if (data.riskLevel === "HIGH") {
-          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: "07:00 - 22:00 단속", zone: data.reasoning };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: "07:00 - 22:00 단속", zone:  formatReasoning(data.reasoning) };
         } else if (data.riskLevel === "MEDIUM") {
-          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: "단속 없음", zone: data.reasoning };
+          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: "단속 없음", zone:  formatReasoning(data.reasoning) };
         } else {
-          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: "단속 없음", zone: data.reasoning };
+          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: "단속 없음", zone:  formatReasoning(data.reasoning) };
         }
       }
 
