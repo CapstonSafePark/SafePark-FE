@@ -42,6 +42,7 @@ export default function History({ setPage, history, setHistory, setResult }) {
       }
     };
     fetchHistory();
+  // eslint-disable-next-line react-hooks/exhaustive-deps  
   }, []);
 
   const handleDeleteHistory = async (historyId, idx) => {
