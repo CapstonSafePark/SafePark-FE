@@ -1,4 +1,4 @@
-const BASE_URL = "http://13.124.185.9:8080";
+const BASE_URL = "http://52.79.227.161:8080";
 
 // 이미지 분석
 export const uploadImage = async (imageFile, lat, lng) => {
