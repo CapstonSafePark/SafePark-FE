@@ -124,11 +124,11 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         const data = checkData.data;
 
         if (data.riskLevel === "HIGH") {
-          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: "07:00 - 22:00 단속", zone: "주정차 금지구역" };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: "07:00 - 22:00 단속", zone: data.reasoning };
         } else if (data.riskLevel === "MEDIUM") {
-          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: "단속 없음", zone: "주의 구역" };
+          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: "단속 없음", zone: data.reasoning };
         } else {
-          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: "단속 없음", zone: "일반 구역" };
+          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: "단속 없음", zone: data.reasoning };
         }
       }
 
@@ -179,9 +179,30 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
       {image && <img src={image} alt="preview" style={{ width: "100%", borderRadius: 10, marginBottom: 12 }} />}
 
-      <button style={styles.button} onClick={handleAnalyze} disabled={isAnalyzing}>
-        {isAnalyzing ? "분석 중..." : "여기 주차해도 되나요?"}
-      </button>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <button
+          style={{ ...styles.button, marginBottom: 0, flex: 1 }}
+          onClick={handleAnalyze}
+          disabled={isAnalyzing}
+        >
+          {isAnalyzing ? "분석 중..." : "여기 주차해도 되나요?"}
+        </button>
+
+        {result && (
+          <button
+            style={{ ...styles.button, marginBottom: 0, flex: 1, background: "#2D2D44" }}
+            onClick={() => {
+              setResult(null);
+              setImage(null);
+              setImageFile(null);
+              setNearbyParking([]);
+            }}
+          >
+            재분석
+          </button>
+        )}
+      </div>
+
 
       {result && (
         <div style={styles.resultCard}>
@@ -218,7 +239,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
               <div style={styles.redText}>{result.time}</div>
             </div>
             <div style={styles.redCard}>
-              <div style={styles.label}>주정차 금지구역</div>
+              <div style={styles.label}>분석 근거</div>
               <div style={styles.redText}>{result.zone}</div>
             </div>
             <div style={styles.yellowCard}>
