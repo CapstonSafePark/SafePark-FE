@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { styles } from "../App";
 import { getHistoryList, deleteHistory, deleteAllHistory } from "../api/history";
 

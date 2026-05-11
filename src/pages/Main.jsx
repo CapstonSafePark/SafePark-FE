@@ -84,6 +84,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       mapRef.current = null;
       markerRef.current = null;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
@@ -124,7 +125,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   if (!reasoning) return "-";
   
   // "반경 내 단속구역 없음" 또는 "단속구역 존재" 부분 추출
-  const zoneMatch = reasoning.match(/반경 내 단속구역 [^\.]*/);
+  const zoneMatch = reasoning.match(/반경 내 단속구역 [^.]*/);
   const zone = zoneMatch ? zoneMatch[0] : "";
   
   // 과태료 확률 추출

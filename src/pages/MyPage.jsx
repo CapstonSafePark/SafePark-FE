@@ -26,6 +26,7 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
       }
     };
     fetchMyInfo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSave = async () => {
