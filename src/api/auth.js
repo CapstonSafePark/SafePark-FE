@@ -1,4 +1,4 @@
-const BASE_URL = "http://52.79.227.161:8080";
+const BASE_URL = "https://safepark.duckdns.org";
 
 // 로그인
 export const login = async (username, password) => {

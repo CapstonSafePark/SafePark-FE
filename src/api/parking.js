@@ -1,4 +1,4 @@
-const BASE_URL = "http://52.79.227.161:8080";
+const BASE_URL = "https://safepark.duckdns.org";
 
 // 주변 주차장 목록
 export const getNearbyParkingLots = async (lat, lng) => {

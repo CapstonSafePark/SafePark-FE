@@ -1,4 +1,4 @@
-const BASE_URL = "http://52.79.227.161:8080";
+const BASE_URL = "https://safepark.duckdns.org";
 // 이미지 분석
 export const uploadImage = async (imageFile, lat, lng) => {
   const token = localStorage.getItem("accessToken");

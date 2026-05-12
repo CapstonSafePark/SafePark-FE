@@ -1,4 +1,4 @@
-const BASE_URL = "http://52.79.227.161:8080";
+const BASE_URL = "https://safepark.duckdns.org";
 
 // 분석 이력 목록 조회
 export const getHistoryList = async (page = 0, limit = 10) => {
