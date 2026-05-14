@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { styles } from "../App";
 import { getNearbyParkingLots, checkParking } from "../api/parking";
 import { uploadImage } from "../api/analysis";
+import { MdMyLocation } from "react-icons/md";
 
 const parkingStyles = {
   lotCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" },
@@ -21,6 +22,8 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   const [address, setAddress] = useState("위치 불러오는 중...");
   const [currentLat, setCurrentLat] = useState(null);
   const [currentLng, setCurrentLng] = useState(null);
+  const [realLat, setRealLat] = useState(null);
+  const [realLng, setRealLng] = useState(null);
   const [nearbyParking, setNearbyParking] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -49,6 +52,8 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
       setCurrentLat(lat);
       setCurrentLng(lng);
+      setRealLat(lat);
+      setRealLng(lng);
 
       const moveLatLon = new window.kakao.maps.LatLng(lat, lng);
 
@@ -57,8 +62,33 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           center: moveLatLon,
           level: 3,
         });
-        const marker = new window.kakao.maps.Marker({ position: moveLatLon });
+        const marker = new window.kakao.maps.Marker({ position: moveLatLon, draggable: true });
         marker.setMap(map);
+        window.kakao.maps.event.addListener(map, 'click', (mouseEvent) => {
+          const latlng = mouseEvent.latLng;
+          const lat = latlng.getLat();
+          const lng = latlng.getLng();
+          setCurrentLat(lat);
+          setCurrentLng(lng);
+          marker.setPosition(latlng);
+          geocoder.coord2Address(lng, lat, (res, status) => {
+            if (status === window.kakao.maps.services.Status.OK) {
+              setAddress(res[0].address.address_name);
+            }
+          });
+        });
+
+        window.kakao.maps.event.addListener(marker, 'dragend', () => {
+          const pos = marker.getPosition();
+          setCurrentLat(pos.getLat());
+          setCurrentLng(pos.getLng());
+          geocoder.coord2Address(pos.getLng(), pos.getLat(), (res, status) => {
+            if (status === window.kakao.maps.services.Status.OK) {
+              setAddress(res[0].address.address_name);
+            }
+          });
+        });
+
         mapRef.current = map;
         markerRef.current = marker;
       } else {
@@ -209,12 +239,48 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         </div>
       </div>
 
-      <div id="map" style={styles.map} />
-
-      <div style={styles.locationCard}>
-        <div style={{ fontSize: 10, color: "#4F8EF7" }}>현재 위치</div>
-        <div style={{ fontSize: 12, color: "#C8C8E0" }}>{address}</div>
+      <div style={{ position: "relative" }}>
+        <div id="map" style={styles.map} />
+        <div
+          style={{
+            position: "absolute",
+            bottom: 12,
+            right: 10,
+            background: "#fff",
+            borderRadius: 8,
+            padding: 8,
+            cursor: "pointer",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+            zIndex: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => {
+            if (mapRef.current && markerRef.current && realLat && realLng) {
+              const moveLatLon = new window.kakao.maps.LatLng(realLat, realLng);
+              mapRef.current.setCenter(moveLatLon);
+              markerRef.current.setPosition(moveLatLon);
+              setCurrentLat(realLat);
+              setCurrentLng(realLng);
+              const geocoder = new window.kakao.maps.services.Geocoder();
+              geocoder.coord2Address(realLng, realLat, (res, status) => {
+                if (status === window.kakao.maps.services.Status.OK) {
+                  setAddress(res[0].address.address_name);
+                }
+              });
+            }
+          }}
+        >
+          <MdMyLocation size={20} color="#4F8EF7" />
+        </div>
       </div>
+
+<div style={styles.locationCard}>
+  <div style={{ fontSize: 10, color: "#4F8EF7" }}>현재 위치</div>
+  <div style={{ fontSize: 12, color: "#C8C8E0" }}>{address}</div>
+</div>
+
 
       <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} />
       <input type="file" ref={cameraInputRef} capture="environment" style={{ display: "none" }} onChange={handleFileChange} />
