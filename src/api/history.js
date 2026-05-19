@@ -42,7 +42,7 @@ export const deleteHistory = async (historyId) => {
 // 전체 분석 이력 삭제
 export const deleteAllHistory = async () => {
   const token = localStorage.getItem("accessToken");
-  const response = await fetch(`${BASE_URL}/api/analysis/history`, {
+  const response = await fetch(`${BASE_URL}/api/history/all`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

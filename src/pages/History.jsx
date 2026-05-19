@@ -55,8 +55,8 @@ export default function History({ setPage, history, setHistory, setResult }) {
                         type: h.riskLevel === "HIGH" ? "danger" : h.riskLevel === "MEDIUM" ? "warning" : "safe",
                         probability: h.probability,
                         time: h.riskLevel === "HIGH" ? "07:00 - 22:00" : h.riskLevel === "MEDIUM" ? "일부 시간대 단속" : "단속 없음",
-                        zone: h.riskLevel === "HIGH" ? "주정차 금지구역" : h.riskLevel === "MEDIUM" ? "주의 구역" : "일반 구역",
-                        line: "-",
+                        line: h.lineColor || "-",
+                        zone: h.reasoning ? (h.reasoning) : (h.riskLevel === "HIGH" ? "주정차 금지구역" : h.riskLevel === "MEDIUM" ? "주의 구역" : "일반 구역"),
                       });
                     });
                   })

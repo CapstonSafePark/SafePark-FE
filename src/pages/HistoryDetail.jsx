@@ -116,7 +116,7 @@ export default function HistoryDetail({ setPage, result }) {
             <div style={styles.redText}>{result.time}</div>
           </div>
           <div style={styles.redCard}>
-            <div style={styles.label}>주정차 금지구역</div>
+            <div style={styles.label}>분석 근거</div>
             <div style={styles.redText}>{result.zone}</div>
           </div>
           <div style={styles.yellowCard}>

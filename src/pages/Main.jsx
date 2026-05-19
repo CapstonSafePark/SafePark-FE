@@ -151,19 +151,16 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   img.src = URL.createObjectURL(file);
 };
 
+
   const formatReasoning = (reasoning) => {
-  if (!reasoning) return "-";
-  
-  // "반경 내 단속구역 없음" 또는 "단속구역 존재" 부분 추출
-  const zoneMatch = reasoning.match(/반경 내 단속구역 [^.]*/);
-  const zone = zoneMatch ? zoneMatch[0] : "";
-  
-  // 과태료 확률 추출
-  const probMatch = reasoning.match(/과태료 확률: (\d+)%/);
-  const prob = probMatch ? `과태료 확률 ${probMatch[1]}%` : "";
-  
-  return [zone, prob].filter(Boolean).join(" / ");
-};
+    if (!reasoning) return "-";
+    const zoneMatch = reasoning.match(/반경 내 단속구역 [^.]*/);
+    const zone = zoneMatch ? zoneMatch[0] : "";
+    const probMatch = reasoning.match(/과태료 확률: (\d+)%/);
+    const prob = probMatch ? `과태료 확률 ${probMatch[1]}%` : "";
+    const result = [zone, prob].filter(Boolean).join(" / ");
+    return result || reasoning;
+  };
 
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
@@ -184,6 +181,10 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           yellow_single: "황색 단선",
           yellow_dashed: "황색 점선",
           none: "차선 감지 불가",
+          "황색이중선": "황색 이중선",
+          "황색단선": "황색 단선",
+          "백색점선": "백색 점선",
+          "없음": "차선 감지 불가",
         };
         const lineText = data.lineColor ? (lineColorMap[data.lineColor] || data.lineColor) : null;
 
