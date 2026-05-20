@@ -3,6 +3,7 @@ import { styles } from "../App";
 import { getNearbyParkingLots, checkParking } from "../api/parking";
 import { uploadImage } from "../api/analysis";
 import { MdMyLocation } from "react-icons/md";
+import { MdSentimentVerySatisfied, MdSentimentSatisfied, MdSentimentNeutral, MdSentimentDissatisfied, MdSentimentVeryDissatisfied } from "react-icons/md";
 
 const parkingStyles = {
   lotCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)" },
@@ -162,6 +163,22 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     return result || reasoning;
   };
 
+  const getEmoji = (probability) => {
+    if (probability <= 20) return <MdSentimentVerySatisfied size={36} color="#2ECC71" />;
+    if (probability <= 40) return <MdSentimentSatisfied size={36} color="#A8E063" />;
+    if (probability <= 60) return <MdSentimentNeutral size={36} color="#F39C12" />;
+    if (probability <= 80) return <MdSentimentDissatisfied size={36} color="#E67E22" />;
+    return <MdSentimentVeryDissatisfied size={36} color="#E74D3C" />;
+  };
+
+  const getCardStyle = (probability) => {
+    if (probability <= 20) return { bg: "rgba(46,204,113,0.1)",  border: "1px solid rgba(46,204,113,0.25)",  text: "#2ECC71" };
+    if (probability <= 40) return { bg: "rgba(168,224,99,0.1)",  border: "1px solid rgba(168,224,99,0.25)",  text: "#A8E063" };
+    if (probability <= 60) return { bg: "rgba(243,156,18,0.1)",  border: "1px solid rgba(243,156,18,0.25)",  text: "#F39C12" };
+    if (probability <= 80) return { bg: "rgba(230,126,34,0.1)",  border: "1px solid rgba(230,126,34,0.25)",  text: "#E67E22" };
+    return                        { bg: "rgba(231,77,60,0.1)",   border: "1px solid rgba(231,77,60,0.25)",   text: "#E74D3C" };
+  };
+
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     console.log("분석 시작", imageFile, currentLat, currentLng);
@@ -189,11 +206,11 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         const lineText = data.lineColor ? (lineColorMap[data.lineColor] || data.lineColor) : null;
 
         if (data.riskLevel === "HIGH") {
-          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: lineText, time: "07:00 - 22:00", zone:  formatReasoning(data.reasoning) };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: lineText, time: "07:00 - 22:00", zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
         } else if (data.riskLevel === "MEDIUM") {
-          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: lineText, time: "일부 시간대 단속", zone:  formatReasoning(data.reasoning) };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: lineText, time: "07:00 - 22:00", zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
         } else {
-          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: lineText, time: "단속 없음", zone:  formatReasoning(data.reasoning) };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: lineText, time: "07:00 - 22:00", zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
         }
       } else {
         // 이미지 없으면 위치 기반 분석
@@ -212,7 +229,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
       setResult(newResult);
       setHistory([
-        { address, date: new Date().toLocaleDateString(), result: newResult.status, type: newResult.type, probability: newResult.probability, time: newResult.time, zone: newResult.zone, line: newResult.line },
+        { address, date: new Date().toLocaleDateString(), result: newResult.status, type: newResult.type, probability: newResult.probability, time: newResult.time, zone: newResult.zone, line: newResult.line, lat: currentLat, lng: currentLng, imagePath: newResult.imagePath || null },
         ...history,
       ]);
 
@@ -322,9 +339,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         <div style={styles.resultCard}>
           <div style={styles.rowBetween}>
             <div style={styles.title}>분석 결과</div>
-            <div style={{ ...styles.badge, ...(result.type === "danger" && styles.badgeDanger), ...(result.type === "warning" && styles.badgeWarning), ...(result.type === "safe" && styles.badgeSafe) }}>
-              {result.status}
-            </div>
           </div>
 
           <div style={styles.probabilityWrap}>
@@ -340,27 +354,43 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                   transform="rotate(-90 50 50)"
                 />
               </svg>
-              <div style={styles.percentText}>{result.probability}%</div>
+              <div style={styles.percentText}>{getEmoji(result.probability)}</div>
             </div>
-            <div style={styles.probText}>단속 걸릴 확률</div>
+            <div style={{ ...styles.probText, color: result.type === "danger" ? "#E74D3C" : result.type === "warning" ? "#F39C12" : "#2ECC71", fontWeight: 700 }}>
+              {result.status}
+            </div>
           </div>
 
           <div style={styles.subCard}>{result.address || address}</div>
 
           <div style={styles.detailWrap}>
-            <div style={styles.redCard}>
-              <div style={styles.label}>단속 시간대</div>
-              <div style={styles.redText}>{result.time}</div>
-            </div>
-            <div style={styles.redCard}>
-              <div style={styles.label}>분석 근거</div>
-              <div style={styles.redText}>{result.zone}</div>
-            </div>
-            <div style={styles.yellowCard}>
-              <div style={styles.label}>주차선 판독</div>
-              <div style={styles.yellowText}>{result.line || "업로드 된 사진 없음"}</div>
-            </div>
+            {(() => {
+              const c = getCardStyle(result.probability);
+              const cardStyle = { ...styles.redCard, background: c.bg, border: c.border };
+              const textStyle = { ...styles.redText, color: c.text };
+              return (
+                <>
+                  <div style={cardStyle}>
+                    <div style={styles.label}>단속 시간대</div>
+                    <div style={textStyle}>{result.time}</div>
+                  </div>
+                  <div style={cardStyle}>
+                    <div style={styles.label}>분석 근거</div>
+                    <div style={textStyle}>
+                      {result.zone?.split('. ').map((sentence, i, arr) => (
+                        <span key={i}>{sentence}{i < arr.length - 1 ? '.' : ''}<br /></span>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={cardStyle}>
+                    <div style={styles.label}>주차선 판독</div>
+                    <div style={textStyle}>{result.line || "업로드 된 사진 없음"}</div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
+
         </div>
       )}
 
