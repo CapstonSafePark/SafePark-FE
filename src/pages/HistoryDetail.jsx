@@ -3,6 +3,7 @@ import { getNearbyParkingLots } from "../api/parking";
 import { useTheme } from "../ThemeContext";
 import { HiArrowLeft } from "react-icons/hi";
 import { MdSentimentVerySatisfied, MdSentimentSatisfied, MdSentimentNeutral, MdSentimentDissatisfied, MdSentimentVeryDissatisfied } from "react-icons/md";
+import ParkingCalculator from "../components/ParkingCalculator";
 
 const BASE_URL = "https://safepark.duckdns.org";
 
@@ -11,6 +12,8 @@ export default function HistoryDetail({ setPage, result }) {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const [nearbyParking, setNearbyParking] = useState([]);
+  const [selectedLot, setSelectedLot] = useState(null);
+
 
   const getParkingStyles = () => ({
     lotCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${theme.border}` },
@@ -179,11 +182,19 @@ export default function HistoryDetail({ setPage, result }) {
                     </div>
                   </div>
                 </div>
-                <div style={parkingStyles.lotPrice}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
                   <div style={{ ...parkingStyles.priceText, whiteSpace: "pre-line", wordBreak: "keep-all", textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>
                     {isFree ? "무료" : priceText}
                   </div>
                   <div style={parkingStyles.priceUnit}>{isFree ? "" : unitText}</div>
+                  {!isFree && lot.feeUnit && (
+                  <button
+                    onClick={() => setSelectedLot(lot)}
+                    style={{ fontSize: 10, padding: "4px 8px", borderRadius: 6, border: `1px solid ${theme.border}`, background: "transparent", color: theme.accent, cursor: "pointer" }}
+                  >
+                    요금계산
+                  </button>
+                  )}
                 </div>
               </div>
             );
@@ -192,6 +203,9 @@ export default function HistoryDetail({ setPage, result }) {
       )}
 
       <div style={{ height: 80 }} />
+      {selectedLot && (
+        <ParkingCalculator lot={selectedLot} onClose={() => setSelectedLot(null)} />
+      )}
     </>
   );
 }

@@ -3,6 +3,7 @@ import { useTheme } from "../ThemeContext";
 import { getNearbyParkingLots, checkParking } from "../api/parking";
 import { uploadImage } from "../api/analysis";
 import { MdMyLocation, MdSentimentVerySatisfied, MdSentimentSatisfied, MdSentimentNeutral, MdSentimentDissatisfied, MdSentimentVeryDissatisfied } from "react-icons/md";
+import ParkingCalculator from "../components/ParkingCalculator";
 
 export default function Main({ setPage, history, setHistory, result, setResult, fromHistory, setFromHistory }) {
   const { styles, theme } = useTheme();
@@ -28,6 +29,8 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   const [realLng, setRealLng] = useState(null);
   const [nearbyParking, setNearbyParking] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedLot, setSelectedLot] = useState(null);
+
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -360,16 +363,25 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                     </div>
                   </div>
                 </div>
-                <div style={parkingStyles.lotPrice}>
-                  <div style={{ ...parkingStyles.priceText, whiteSpace: "pre-line", wordBreak: "keep-all", textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>
-                    {isFree ? "무료" : priceText}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                    <div style={{ ...parkingStyles.priceText, whiteSpace: "pre-line", textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>{isFree ? "무료" : priceText}</div>
+                    <div style={parkingStyles.priceUnit}>{isFree ? "" : unitText}</div>
+                    {!isFree && lot.feeUnit && (
+                    <button
+                      onClick={() => setSelectedLot(lot)}
+                      style={{ fontSize: 10, padding: "4px 8px", borderRadius: 6, border: `1px solid ${theme.border}`, background: "transparent", color: theme.accent, cursor: "pointer" }}
+                    >
+                      요금계산
+                    </button>
+                    )}
                   </div>
-                  <div style={parkingStyles.priceUnit}>{isFree ? "" : unitText}</div>
                 </div>
-              </div>
             );
           })}
         </div>
+      )}
+      {selectedLot && (
+        <ParkingCalculator lot={selectedLot} onClose={() => setSelectedLot(null)} />
       )}
     </>
   );
