@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { logout, getMyInfo, updateMyInfo, changePassword, deleteAccount } from "../api/auth";
-import { styles } from "../App";
+import { useTheme } from "../ThemeContext";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 export default function MyPage({ setPage, user, setUser, setHistory }) {
+  const { styles, theme, isDark, toggleTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: user?.name || "", email: user?.email || "", phone: user?.phone || "" });
   const [currentPassword, setCurrentPassword] = useState("");
@@ -35,11 +37,7 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
     if (!editForm.phone.trim()) return alert("전화번호를 입력해주세요");
 
     try {
-      const response = await updateMyInfo({
-        name: editForm.name,
-        email: editForm.email,
-        phone: editForm.phone,
-      });
+      const response = await updateMyInfo({ name: editForm.name, email: editForm.email, phone: editForm.phone });
       if (response.ok) {
         setUser({ ...user, ...editForm });
         alert("정보가 수정되었습니다!");
@@ -54,11 +52,8 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
       try {
         const pwResponse = await changePassword(user.id, currentPassword, newPassword);
         const pwData = await pwResponse.json();
-        if (pwResponse.ok) {
-          alert(pwData.message || "비밀번호가 변경되었습니다!");
-        } else {
-          alert(pwData.message || "비밀번호 변경 실패");
-        }
+        if (pwResponse.ok) alert(pwData.message || "비밀번호가 변경되었습니다!");
+        else alert(pwData.message || "비밀번호 변경 실패");
       } catch (e) {
         alert("비밀번호 변경 중 오류 발생");
       }
@@ -109,12 +104,40 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
         <div style={styles.logoText}>마이페이지</div>
       </div>
 
+      {/* 화면 설정 */}
+      <div style={{ ...styles.resultCard, marginBottom: 12 }}>
+        <div style={styles.rowBetween}>
+          <div style={styles.title}>화면 설정</div>
+        </div>
+        <div style={{ ...styles.infoRow, borderBottom: "none", marginTop: 8 }}>
+          <span style={{ fontSize: 13, color: theme.textSecondary }}>
+            {isDark ? "다크 모드" : "라이트 모드"}
+          </span>
+          <div
+            onClick={toggleTheme}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: isDark ? theme.smallBtnBg : "#E8EAFF",
+              border: `1px solid ${theme.border}`,
+              borderRadius: 20, padding: "6px 14px",
+              cursor: "pointer", fontSize: 12,
+              color: theme.textPrimary, fontWeight: 600,
+            }}
+          >
+            {isDark
+              ? <><MdLightMode size={16} color="#F39C12" /> 라이트로 전환</>
+              : <><MdDarkMode size={16} color="#4F8EF7" /> 다크로 전환</>
+            }
+          </div>
+        </div>
+      </div>
+
       {/* 내 정보 */}
       <div style={styles.resultCard}>
         <div style={styles.rowBetween}>
           <div style={styles.title}>내 정보</div>
           {!isEditing && (
-            <span style={{ fontSize: 12, color: "#4F8EF7", cursor: "pointer" }} onClick={() => setIsEditing(true)}>
+            <span style={{ fontSize: 12, color: theme.accent, cursor: "pointer" }} onClick={() => setIsEditing(true)}>
               수정
             </span>
           )}
@@ -139,14 +162,14 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
                 <div style={styles.label}>현재 비밀번호</div>
                 <div style={{ position: "relative" }}>
                   <input
-                    style={{ ...styles.input, width: "100%", boxSizing: "border-box", paddingRight: 40 }}
+                    style={{ ...styles.input, paddingRight: 40 }}
                     type={showCurrent ? "text" : "password"}
                     placeholder="현재 비밀번호 입력"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                   />
                   <span onClick={() => setShowCurrent(!showCurrent)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}>
-                    {showCurrent ? <AiOutlineEyeInvisible size={18} color="#9898B8" /> : <AiOutlineEye size={18} color="#9898B8" />}
+                    {showCurrent ? <AiOutlineEyeInvisible size={18} color={theme.textMuted} /> : <AiOutlineEye size={18} color={theme.textMuted} />}
                   </span>
                 </div>
               </div>
@@ -154,18 +177,17 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
                 <div style={styles.label}>새 비밀번호</div>
                 <div style={{ position: "relative" }}>
                   <input
-                    style={{ ...styles.input, width: "100%", boxSizing: "border-box", paddingRight: 40 }}
+                    style={{ ...styles.input, paddingRight: 40 }}
                     type={showNew ? "text" : "password"}
                     placeholder="새 비밀번호 입력"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
                   <span onClick={() => setShowNew(!showNew)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}>
-                    {showNew ? <AiOutlineEyeInvisible size={18} color="#9898B8" /> : <AiOutlineEye size={18} color="#9898B8" />}
+                    {showNew ? <AiOutlineEyeInvisible size={18} color={theme.textMuted} /> : <AiOutlineEye size={18} color={theme.textMuted} />}
                   </span>
                 </div>
               </div>
-
               <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                 <button style={styles.detailBtn} onClick={handleSave}>저장</button>
                 <button style={styles.deleteBtn} onClick={handleCancel}>취소</button>

@@ -1,6 +1,9 @@
 import { HiHome, HiClipboardList, HiUser } from "react-icons/hi";
+import { useTheme } from "../ThemeContext";
 
 export default function TabBar({ page, setPage }) {
+  const { theme } = useTheme();
+
   const tabs = [
     { id: "main", label: "홈", icon: HiHome },
     { id: "history", label: "기록", icon: HiClipboardList },
@@ -8,48 +11,37 @@ export default function TabBar({ page, setPage }) {
   ];
 
   return (
-    <div style={tabStyles.container}>
+    <div style={{
+      position: "fixed",
+      bottom: 0,
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "375px",
+      background: theme.tabBar,
+      borderTop: `1px solid ${theme.tabBarBorder}`,
+      display: "flex",
+      justifyContent: "space-around",
+      padding: "10px 0 20px 0",
+      zIndex: 100,
+    }}>
       {tabs.map((tab) => (
         <div
           key={tab.id}
           style={{
-            ...tabStyles.tab,
-            color: page === tab.id ? "#4F8EF7" : "#9898B8",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 4,
+            cursor: "pointer",
+            flex: 1,
+            color: page === tab.id ? theme.accent : theme.textMuted,
           }}
           onClick={() => setPage(tab.id)}
         >
           <tab.icon size={22} />
-          <div style={tabStyles.label}>{tab.label}</div>
+          <div style={{ fontSize: 10, fontWeight: 600 }}>{tab.label}</div>
         </div>
       ))}
     </div>
   );
 }
-
-const tabStyles = {
-  container: {
-    position: "fixed",
-    bottom: 0,
-    left: "50%",
-    transform: "translateX(-50%)",
-    width: "375px",
-    background: "#0D0D1A",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
-    display: "flex",
-    justifyContent: "space-around",
-    padding: "10px 0 20px 0",
-    zIndex: 100,
-  },
-  tab: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 4,
-    cursor: "pointer",
-    flex: 1,
-  },
-  label: {
-    fontSize: 10,
-    fontWeight: 600,
-  },
-};

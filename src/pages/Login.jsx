@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { login } from "../api/auth";
 import Logo from "../components/Logo";
-import { styles } from "../App";
+import { useTheme } from "../ThemeContext";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function Login({ setPage, setUser }) {
+  const { styles, theme } = useTheme();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +16,6 @@ export default function Login({ setPage, setUser }) {
 
     try {
       const result = await login(username, password);
-
       if (result.ok) {
         setUser({
           id: result.data?.data?.userId,
@@ -36,7 +36,6 @@ export default function Login({ setPage, setUser }) {
   return (
     <>
       <Logo />
-
       <div style={styles.inputWrap}>
         <input
           style={styles.input}
@@ -44,10 +43,9 @@ export default function Login({ setPage, setUser }) {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
-
         <div style={{ position: "relative" }}>
           <input
-            style={{ ...styles.input, width: "100%", boxSizing: "border-box", paddingRight: 40 }}
+            style={{ ...styles.input, paddingRight: 40 }}
             type={showPassword ? "text" : "password"}
             placeholder="비밀번호"
             value={password}
@@ -55,22 +53,18 @@ export default function Login({ setPage, setUser }) {
           />
           <span
             onClick={() => setShowPassword(!showPassword)}
-            style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer", fontSize: 16 }}
+            style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}
           >
-            {showPassword ? <AiOutlineEyeInvisible size={18} color="#9898B8" /> : <AiOutlineEye size={18} color="#9898B8" />}
+            {showPassword
+              ? <AiOutlineEyeInvisible size={18} color={theme.textMuted} />
+              : <AiOutlineEye size={18} color={theme.textMuted} />}
           </span>
         </div>
       </div>
-
-      <button style={styles.button} onClick={handleLogin}>
-        로그인
-      </button>
-
+      <button style={styles.button} onClick={handleLogin}>로그인</button>
       <div style={styles.switchText}>
         계정이 없으신가요?{" "}
-        <span onClick={() => setPage("register")} style={styles.link}>
-          회원가입
-        </span>
+        <span onClick={() => setPage("register")} style={styles.link}>회원가입</span>
       </div>
     </>
   );
