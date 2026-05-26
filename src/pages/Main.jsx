@@ -30,12 +30,54 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   const [nearbyParking, setNearbyParking] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedLot, setSelectedLot] = useState(null);
+  const [parkingSortType, setParkingSortType] = useState("distance");
+  const [mapSelectedLot, setMapSelectedLot] = useState(null);
 
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+  const parkingMarkersRef = useRef([]);
+
+  const fetchAndShowParkingMarkers = async (lat, lng) => {
+    if (!mapRef.current || !window.kakao) return;
+    try {
+      const res = await getNearbyParkingLots(lat, lng, 1.0);
+      const data = await res.json();
+      const lots = Array.isArray(data) ? data : (data.data || []);
+      setNearbyParking(lots);
+
+      parkingMarkersRef.current.forEach(m => m.setMap(null));
+      parkingMarkersRef.current = [];
+
+      lots.forEach((lot, idx) => {
+        if (!lot.lat || !lot.lng) return;
+        const isFree = (lot.parkingFeeDesc && lot.parkingFeeDesc.includes("무료")) || lot.freeYn === true;
+        const color = isFree ? "#2ECC71" : "#4F8EF7";
+
+        // DOM 엘리먼트로 생성 후 stopPropagation → 지도 클릭 이벤트로 버블링 방지
+        const contentEl = document.createElement("div");
+        contentEl.textContent = "P";
+        contentEl.style.cssText = `width:28px;height:28px;border-radius:50%;background:${color};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 4px rgba(0,0,0,0.3);cursor:pointer`;
+        contentEl.addEventListener("click", (e) => {
+          e.stopPropagation();
+          setMapSelectedLot(lots[idx]);
+        });
+
+        const overlay = new window.kakao.maps.CustomOverlay({
+          position: new window.kakao.maps.LatLng(lot.lat, lot.lng),
+          content: contentEl,
+          yAnchor: 1,
+          clickable: true,  // 카카오 map click 이벤트로 버블링 차단
+        });
+        overlay.setMap(mapRef.current);
+        parkingMarkersRef.current.push(overlay);
+      });
+    } catch (e) {
+      console.error("주차장 마커 로드 실패:", e);
+    }
+  };
 
   useEffect(() => {
     mapRef.current = null;
@@ -84,8 +126,17 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           });
         });
 
+        // 지도 이동 끝날 때마다 마커 갱신
+        window.kakao.maps.event.addListener(map, "idle", () => {
+          const center = map.getCenter();
+          fetchAndShowParkingMarkers(center.getLat(), center.getLng());
+        });
+
         mapRef.current = map;
         markerRef.current = marker;
+
+        // 초기 마커 로드
+        fetchAndShowParkingMarkers(lat, lng);
       } else {
         mapRef.current.setCenter(moveLatLon);
         markerRef.current.setPosition(moveLatLon);
@@ -200,10 +251,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         ...history,
       ]);
 
-      const parkingResponse = await getNearbyParkingLots(lat, lng);
-      const parkingData = await parkingResponse.json();
-      if (Array.isArray(parkingData)) setNearbyParking(parkingData);
-      else if (Array.isArray(parkingData.data)) setNearbyParking(parkingData.data);
+      await fetchAndShowParkingMarkers(lat, lng);
 
     } catch (e) {
       console.error("분석 오류:", e);
@@ -214,6 +262,25 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   };
 
   const parkingStyles = getParkingStyles();
+  const getParkingPriceValue = (lot) => {
+    const isFree = (lot.parkingFeeDesc && lot.parkingFeeDesc.includes("무료")) || lot.freeYn === true;
+
+    if (isFree) return 0;
+
+    if (lot.lotPrice !== null && lot.lotPrice !== undefined) {
+      return Number(lot.lotPrice);
+    }
+
+    return Number.MAX_SAFE_INTEGER;
+  };
+
+  const sortedNearbyParking = [...nearbyParking].sort((a, b) => {
+    if (parkingSortType === "price") {
+      return getParkingPriceValue(a) - getParkingPriceValue(b);
+    }
+
+    return (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER);
+  });
 
   return (
     <>
@@ -278,7 +345,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         {result && (
           <button
             style={{ ...styles.button, marginBottom: 0, flex: 1, background: theme.smallBtnBg, color: theme.textPrimary }}
-            onClick={() => { setResult(null); setImage(null); setImageFile(null); setNearbyParking([]); }}
+            onClick={() => { setResult(null); setImage(null); setImageFile(null); setNearbyParking([]); parkingMarkersRef.current.forEach(m => m.setMap(null)); parkingMarkersRef.current = []; }}
           >
             재분석
           </button>
@@ -342,8 +409,42 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
       {result && nearbyParking.length > 0 && (
         <div style={{ ...styles.resultCard, marginTop: 12 }}>
-          <div style={styles.title}>주변 주차장</div>
-          {nearbyParking.map((lot) => {
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <div style={styles.title}>주변 주차장</div>
+
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                  onClick={() => setParkingSortType("distance")}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 9px",
+                    borderRadius: 8,
+                    border: `1px solid ${parkingSortType === "distance" ? theme.accent : theme.border}`,
+                    background: parkingSortType === "distance" ? "rgba(79,142,247,0.15)" : "transparent",
+                    color: parkingSortType === "distance" ? theme.accent : theme.textMuted,
+                    cursor: "pointer",
+                  }}
+              >
+                거리순
+              </button>
+
+              <button
+                  onClick={() => setParkingSortType("price")}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 9px",
+                    borderRadius: 8,
+                    border: `1px solid ${parkingSortType === "price" ? theme.accent : theme.border}`,
+                    background: parkingSortType === "price" ? "rgba(79,142,247,0.15)" : "transparent",
+                    color: parkingSortType === "price" ? theme.accent : theme.textMuted,
+                    cursor: "pointer",
+                  }}
+              >
+                요금순
+              </button>
+            </div>
+          </div>
+          {sortedNearbyParking.map((lot) => {
             const isFree = (lot.parkingFeeDesc && lot.parkingFeeDesc.includes("무료")) || lot.freeYn === true;
             const priceText = lot.parkingFeeDesc
               ? lot.parkingFeeDesc.replace(/\s*추가요금:/g, "\n추가요금:").trim()
@@ -352,7 +453,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
               : "요금 정보 없음";
             const unitText = lot.feeUnit ? `기본 ${lot.feeUnit}분` : "기본요금";
             return (
-              <div key={lot.id} style={parkingStyles.lotCard}>
+              <div key={lot.id ?? `${lot.lotName}-${lot.distanceKm}`} style={parkingStyles.lotCard}>
                 <div style={parkingStyles.lotLeft}>
                   <div style={parkingStyles.lotIcon}>P</div>
                   <div>
@@ -382,6 +483,42 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       )}
       {selectedLot && (
         <ParkingCalculator lot={selectedLot} onClose={() => setSelectedLot(null)} />
+      )}
+
+      {mapSelectedLot && (
+        <div style={{ position: "fixed", bottom: 80, left: "50%", transform: "translateX(-50%)", width: "90%", maxWidth: 400, background: theme.card, borderRadius: 16, padding: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.4)", zIndex: 100 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+            <div style={{ fontWeight: 700, fontSize: 14, color: theme.textPrimary }}>{mapSelectedLot.lotName}</div>
+            <div onClick={() => setMapSelectedLot(null)} style={{ cursor: "pointer", color: theme.textMuted, fontSize: 18, lineHeight: 1 }}>✕</div>
+          </div>
+          {mapSelectedLot.address && <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 8 }}>{mapSelectedLot.address}</div>}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+            <span style={{ background: (mapSelectedLot.parkingFeeDesc?.includes("무료") || mapSelectedLot.freeYn) ? "rgba(46,204,113,0.15)" : "rgba(79,142,247,0.15)", color: (mapSelectedLot.parkingFeeDesc?.includes("무료") || mapSelectedLot.freeYn) ? "#2ECC71" : "#4F8EF7", borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 600 }}>
+              {(mapSelectedLot.parkingFeeDesc?.includes("무료") || mapSelectedLot.freeYn) ? "무료" : "유료"}
+            </span>
+            {mapSelectedLot.availableSpots != null && (
+              <span style={{ background: "rgba(255,255,255,0.05)", borderRadius: 20, padding: "2px 10px", fontSize: 11, color: theme.textSecondary }}>
+                가용 {mapSelectedLot.availableSpots} / {mapSelectedLot.totalSpaces ?? "-"} 면
+              </span>
+            )}
+          </div>
+          {mapSelectedLot.operatingHours && <div style={{ fontSize: 11, color: theme.textSecondary, marginBottom: 4 }}>🕐 {mapSelectedLot.operatingHours}</div>}
+          <div style={{ fontSize: 12, color: theme.accent, fontWeight: 600, whiteSpace: "pre-line" }}>
+            {mapSelectedLot.parkingFeeDesc
+              ? mapSelectedLot.parkingFeeDesc.replace(/\s*추가요금:/g, "\n추가요금:")
+              : mapSelectedLot.feeUnit
+              ? `기본 ${mapSelectedLot.feeUnit}분 ${mapSelectedLot.lotPrice}원\n추가 ${mapSelectedLot.addUnitTime}분당 ${mapSelectedLot.addUnitPrice}원`
+              : "요금 정보 없음"}
+          </div>
+          {!( mapSelectedLot.parkingFeeDesc?.includes("무료") || mapSelectedLot.freeYn) && mapSelectedLot.feeUnit && (
+            <button
+              onClick={() => { setSelectedLot(mapSelectedLot); setMapSelectedLot(null); }}
+              style={{ marginTop: 10, width: "100%", padding: "8px 0", borderRadius: 8, border: "none", background: theme.accent, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+            >
+              요금 계산하기
+            </button>
+          )}
+        </div>
       )}
     </>
   );
