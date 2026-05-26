@@ -13,6 +13,7 @@ export default function HistoryDetail({ setPage, result }) {
   const markerRef = useRef(null);
   const [nearbyParking, setNearbyParking] = useState([]);
   const [selectedLot, setSelectedLot] = useState(null);
+  const [parkingSortType, setParkingSortType] = useState("distance");
 
 
   const getParkingStyles = () => ({
@@ -76,6 +77,30 @@ export default function HistoryDetail({ setPage, result }) {
   if (!result) return null;
 
   const parkingStyles = getParkingStyles();
+  const getParkingPriceValue = (lot) => {
+    const isFree =
+        (lot.parkingFeeDesc && lot.parkingFeeDesc.includes("무료")) ||
+        lot.freeYn === true;
+
+    if (isFree) return 0;
+
+    if (lot.lotPrice !== null && lot.lotPrice !== undefined) {
+      return Number(lot.lotPrice);
+    }
+
+    return Number.MAX_SAFE_INTEGER;
+  };
+
+  const sortedNearbyParking = [...nearbyParking].sort((a, b) => {
+    if (parkingSortType === "price") {
+      return getParkingPriceValue(a) - getParkingPriceValue(b);
+    }
+
+    return (
+        (a.distanceKm ?? Number.MAX_SAFE_INTEGER) -
+        (b.distanceKm ?? Number.MAX_SAFE_INTEGER)
+    );
+  });
 
   return (
     <>
@@ -161,8 +186,69 @@ export default function HistoryDetail({ setPage, result }) {
 
       {nearbyParking.length > 0 && (
         <div style={{ ...styles.resultCard, marginTop: 12 }}>
-          <div style={styles.title}>주변 주차장</div>
-          {nearbyParking.map((lot) => {
+          <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 8,
+              }}
+          >
+            <div style={styles.title}>주변 주차장</div>
+
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                  onClick={() => setParkingSortType("distance")}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 9px",
+                    borderRadius: 8,
+                    border: `1px solid ${
+                        parkingSortType === "distance"
+                            ? theme.accent
+                            : theme.border
+                    }`,
+                    background:
+                        parkingSortType === "distance"
+                            ? "rgba(79,142,247,0.15)"
+                            : "transparent",
+                    color:
+                        parkingSortType === "distance"
+                            ? theme.accent
+                            : theme.textMuted,
+                    cursor: "pointer",
+                  }}
+              >
+                거리순
+              </button>
+
+              <button
+                  onClick={() => setParkingSortType("price")}
+                  style={{
+                    fontSize: 11,
+                    padding: "5px 9px",
+                    borderRadius: 8,
+                    border: `1px solid ${
+                        parkingSortType === "price"
+                            ? theme.accent
+                            : theme.border
+                    }`,
+                    background:
+                        parkingSortType === "price"
+                            ? "rgba(79,142,247,0.15)"
+                            : "transparent",
+                    color:
+                        parkingSortType === "price"
+                            ? theme.accent
+                            : theme.textMuted,
+                    cursor: "pointer",
+                  }}
+              >
+                요금순
+              </button>
+            </div>
+          </div>
+          {sortedNearbyParking.map((lot) => {
             const isFree = (lot.parkingFeeDesc && lot.parkingFeeDesc.includes("무료")) || lot.freeYn === true;
             const priceText = lot.parkingFeeDesc
               ? lot.parkingFeeDesc.replace(/\s*추가요금:/g, "\n추가요금:").trim()
