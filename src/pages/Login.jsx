@@ -35,7 +35,9 @@ export default function Login({ setPage, setUser }) {
 
   return (
     <>
-      <Logo />
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", marginBottom: 24 }}>
+        <Logo />
+      </div>
       <div style={styles.inputWrap}>
         <input
           style={styles.input}
