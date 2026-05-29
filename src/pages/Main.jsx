@@ -220,25 +220,18 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       alert("카카오 지도를 불러오지 못했습니다.");
       return;
     }
-
     if (!currentLat || !currentLng) {
       alert("현재 위치 정보가 없습니다.");
       return;
     }
-
     setShowRoadview(true);
-
     setTimeout(() => {
-      const roadviewContainer = document.getElementById("roadview");
-      if (!roadviewContainer) return;
-
+      const containerId = "roadview";
+      const container = document.getElementById(containerId);
+      if (!container) return;
       const position = new window.kakao.maps.LatLng(currentLat, currentLng);
-
-      if (!roadviewRef.current) {
-        roadviewRef.current = new window.kakao.maps.Roadview(roadviewContainer);
-        roadviewClientRef.current = new window.kakao.maps.RoadviewClient();
-      }
-
+      roadviewRef.current = new window.kakao.maps.Roadview(container);
+      roadviewClientRef.current = new window.kakao.maps.RoadviewClient();
       roadviewClientRef.current.getNearestPanoId(position, 50, (panoId) => {
         if (panoId) {
           roadviewRef.current.setPanoId(panoId, position);
@@ -448,7 +441,20 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
             <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
               <div
                 style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
-                onClick={() => setShowRoadview("full")}
+                onClick={() => {
+                  setShowRoadview("full");
+                  setTimeout(() => {
+                    const container = document.getElementById("roadview-full");
+                    if (!container) return;
+                    const position = new window.kakao.maps.LatLng(currentLat, currentLng);
+                    const rv = new window.kakao.maps.Roadview(container);
+                    const client = new window.kakao.maps.RoadviewClient();
+                    client.getNearestPanoId(position, 50, (panoId) => {
+                      if (panoId) rv.setPanoId(panoId, position);
+                      else alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
+                    });
+                  }, 100);
+                }}
               >⛶ 전체화면</div>
               <div
                 style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}

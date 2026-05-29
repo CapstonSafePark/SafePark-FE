@@ -38,7 +38,9 @@ export default function Register({ setPage }) {
 
   return (
     <>
-      <Logo />
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "60px", marginBottom: 24 }}>
+        <Logo />
+      </div>
       <div style={styles.inputWrap}>
         <input
           style={styles.input}
