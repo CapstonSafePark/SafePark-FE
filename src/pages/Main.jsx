@@ -30,12 +30,14 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   const [nearbyParking, setNearbyParking] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedLot, setSelectedLot] = useState(null);
-
+  const [showRoadview, setShowRoadview] = useState(false);
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+  const roadviewRef = useRef(null);
+  const roadviewClientRef = useRef(null);
 
   useEffect(() => {
     mapRef.current = null;
@@ -156,6 +158,39 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     if (probability <= 60) return { bg: "rgba(243,156,18,0.1)", border: "1px solid rgba(243,156,18,0.25)", text: "#F39C12" };
     if (probability <= 80) return { bg: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.25)", text: "#E67E22" };
     return { bg: "rgba(231,77,60,0.1)", border: "1px solid rgba(231,77,60,0.25)", text: "#E74D3C" };
+  };
+  const handleRoadview = () => {
+    if (!window.kakao || !window.kakao.maps) {
+      alert("카카오 지도를 불러오지 못했습니다.");
+      return;
+    }
+
+    if (!currentLat || !currentLng) {
+      alert("현재 위치 정보가 없습니다.");
+      return;
+    }
+
+    setShowRoadview(true);
+
+    setTimeout(() => {
+      const roadviewContainer = document.getElementById("roadview");
+      if (!roadviewContainer) return;
+
+      const position = new window.kakao.maps.LatLng(currentLat, currentLng);
+
+      if (!roadviewRef.current) {
+        roadviewRef.current = new window.kakao.maps.Roadview(roadviewContainer);
+        roadviewClientRef.current = new window.kakao.maps.RoadviewClient();
+      }
+
+      roadviewClientRef.current.getNearestPanoId(position, 50, (panoId) => {
+        if (panoId) {
+          roadviewRef.current.setPanoId(panoId, position);
+        } else {
+          alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
+        }
+      });
+    }, 100);
   };
 
   const handleAnalyze = async () => {
