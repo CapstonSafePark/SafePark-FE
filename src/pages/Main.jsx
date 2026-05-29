@@ -442,22 +442,31 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         </div>
       </div>
       {showRoadview && (
-        <div style={{ position: "relative", marginBottom: 12 }}>
-          <div id="roadview" style={{ width: "100%", height: "220px", borderRadius: "14px" }} />
-          <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
-            <div
-              style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
-              onClick={() => {
-                const el = document.getElementById("roadview");
-                if (el.requestFullscreen) el.requestFullscreen();
-              }}
-            >⛶ 전체화면</div>
-            <div
-              style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
-              onClick={() => setShowRoadview(false)}
-            >닫기</div>
+        <>
+          <div style={{ position: "relative", marginBottom: 12 }}>
+            <div id="roadview" style={{ width: "100%", height: "220px", borderRadius: "14px" }} />
+            <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
+              <div
+                style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
+                onClick={() => setShowRoadview("full")}
+              >⛶ 전체화면</div>
+              <div
+                style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
+                onClick={() => setShowRoadview(false)}
+              >닫기</div>
+            </div>
           </div>
-        </div>
+
+          {showRoadview === "full" && (
+            <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "#000", zIndex: 999 }}>
+              <div id="roadview-full" style={{ width: "100%", height: "100%" }} />
+              <div
+                style={{ position: "absolute", top: 16, right: 16, background: "rgba(0,0,0,0.6)", borderRadius: 8, padding: "6px 12px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, zIndex: 1000 }}
+                onClick={() => setShowRoadview(true)}
+              >✕ 닫기</div>
+            </div>
+          )}
+        </>
       )}
 
       {/* 분석/재분석 버튼 */}
