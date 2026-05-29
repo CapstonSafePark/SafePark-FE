@@ -405,7 +405,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       <div style={{ position: "relative", marginBottom: 12 }}>
         <div
           style={{ ...styles.uploadBox, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "opacity 0.15s", background: "rgba(79,142,247,0.04)" }}
-          onClick={() => alert("로드뷰 기능은 준비 중이에요!")}
+          onClick={handleRoadview}
           onMouseEnter={e => {
             e.currentTarget.style.opacity = "0.75";
             document.getElementById("roadview-tooltip").style.display = "block";
@@ -441,6 +441,15 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           로드뷰에서 캡처한 사진을 갤러리에 저장 후 업로드해보세요
         </div>
       </div>
+      {showRoadview && (
+        <div style={{ position: "relative", marginBottom: 12 }}>
+          <div id="roadview" style={{ width: "100%", height: "220px", borderRadius: "14px" }} />
+          <div
+            style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
+            onClick={() => setShowRoadview(false)}
+          >닫기</div>
+        </div>
+      )}
 
       {/* 분석/재분석 버튼 */}
       <button
