@@ -444,10 +444,19 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       {showRoadview && (
         <div style={{ position: "relative", marginBottom: 12 }}>
           <div id="roadview" style={{ width: "100%", height: "220px", borderRadius: "14px" }} />
-          <div
-            style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
-            onClick={() => setShowRoadview(false)}
-          >닫기</div>
+          <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
+            <div
+              style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
+              onClick={() => {
+                const el = document.getElementById("roadview");
+                if (el.requestFullscreen) el.requestFullscreen();
+              }}
+            >⛶ 전체화면</div>
+            <div
+              style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
+              onClick={() => setShowRoadview(false)}
+            >닫기</div>
+          </div>
         </div>
       )}
 
