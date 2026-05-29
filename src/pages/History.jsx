@@ -119,22 +119,45 @@ export default function History({ setPage, history, setHistory, setResult }) {
               {h.result}
             </div>
             <div style={styles.historyBtnRow}>
-              <button style={styles.detailBtn} onClick={() => {
-                setResult({ probability: h.probability, status: h.result, type: h.type, line: h.line, time: h.time, zone: h.zone, address: h.address, lat: h.lat, lng: h.lng });
-                setPage("historyDetail");
-              }}>
+              <button
+                style={styles.detailBtn}
+                onClick={() => {
+                  setResult({ probability: h.probability, status: h.result, type: h.type, line: h.line, time: h.time, zone: h.zone, address: h.address, lat: h.lat, lng: h.lng });
+                  setPage("historyDetail");
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = theme.accent; e.currentTarget.style.color = "#fff"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = theme.accent; }}
+                onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
+                onMouseUp={e => e.currentTarget.style.opacity = "1"}
+              >
                 상세 조회
               </button>
-              <button style={styles.deleteBtn} onClick={() => handleDeleteHistory(h.id, i)}>
+              <button
+                style={styles.deleteBtn}
+                onClick={() => handleDeleteHistory(h.id, i)}
+                onMouseEnter={e => { e.currentTarget.style.background = theme.danger; e.currentTarget.style.color = "#fff"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = theme.danger; }}
+                onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
+                onMouseUp={e => e.currentTarget.style.opacity = "1"}
+              >
                 삭제
-              </button>
+              </button>                          
             </div>
           </div>
         ))}
 
-        {history.length > 0 && (
-          <button style={styles.allDeleteBtn} onClick={handleDeleteAllHistory}>전체 삭제</button>
-        )}
+      {history.length > 0 && (
+        <button
+          style={styles.allDeleteBtn}
+          onClick={handleDeleteAllHistory}
+          onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+          onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
+          onMouseUp={e => e.currentTarget.style.opacity = "0.85"}
+        >
+          전체 삭제
+        </button>
+      )}
       </div>
 
       <div style={{ height: 80 }} />

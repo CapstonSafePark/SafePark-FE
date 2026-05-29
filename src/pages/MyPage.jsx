@@ -221,8 +221,26 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
       {/* 계정 관리 */}
       <div style={styles.resultCard}>
         <div style={styles.title}>계정 관리</div>
-        <button style={styles.smallBtn} onClick={handleLogout}>로그아웃</button>
-        <button style={styles.withdrawBtn} onClick={handleDeleteAccount}>회원 탈퇴</button>
+        <button
+          style={styles.smallBtn}
+          onClick={handleLogout}
+          onMouseEnter={e => { e.currentTarget.style.background = theme.accent; e.currentTarget.style.color = "#fff"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = theme.smallBtnBg; e.currentTarget.style.color = theme.textPrimary; }}
+          onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
+          onMouseUp={e => e.currentTarget.style.opacity = "1"}
+        >
+          로그아웃
+        </button>  
+        <button
+          style={styles.withdrawBtn}
+          onClick={handleDeleteAccount}
+          onMouseEnter={e => { e.currentTarget.style.background = theme.danger; e.currentTarget.style.color = "#fff"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = theme.danger; }}
+          onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
+          onMouseUp={e => e.currentTarget.style.opacity = "1"}
+        >
+          회원 탈퇴
+        </button>    
       </div>
 
       <div style={{ height: 80 }} />
