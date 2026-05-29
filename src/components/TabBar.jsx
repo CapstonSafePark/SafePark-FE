@@ -16,8 +16,8 @@ export default function TabBar({ page, setPage }) {
       bottom: 0,
       left: "50%",                        // ← 수정
       transform: "translateX(-50%)",      // ← 추가
-      width: "400px",                     // ← 수정
-      maxWidth: "100%",                   // ← 추가
+      width: "100%",                     // ← 수정
+      maxWidth: "430px",                   // ← 추가
       background: theme.tabBar,
       borderTop: `1px solid ${theme.tabBarBorder}`,
       display: "flex",

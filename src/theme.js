@@ -70,7 +70,7 @@ export const lightTheme = {
 
 export const getStyles = (t) => ({
   wrapper: { minWidth: "100vw", minHeight: "100vh", display: "flex", justifyContent: "center", background: t.wrapper },  
-  frame: { width: "400px", height: "100vh", background: t.frame, padding: "16px", paddingBottom: "80px", color: t.textPrimary, fontFamily: "Noto Sans KR", position: "relative", overflowY: "auto" },
+  frame: { width: "100%", maxWidth: "430px", height: "100vh", background: t.frame, padding: "16px", paddingBottom: "80px", color: t.textPrimary, fontFamily: "Noto Sans KR", position: "relative", overflowY: "auto" },
   topbar: { marginBottom: 10, fontWeight: 800, fontSize: 18 },
   topbarRow: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   logoText: { fontWeight: 800, fontSize: 18 },
