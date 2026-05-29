@@ -98,6 +98,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   };
   const roadviewRef = useRef(null);
   const roadviewClientRef = useRef(null);
+  const roadviewPositionRef = useRef(null);
 
   useEffect(() => {
     mapRef.current = null;
@@ -112,13 +113,15 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     const initMap = (lat, lng) => {
       const container = document.getElementById("map");
       if (!container) return;
-      setCurrentLat(lat);
-      setCurrentLng(lng);
-      setRealLat(lat);
-      setRealLng(lng);
       const moveLatLon = new window.kakao.maps.LatLng(lat, lng);
 
       if (!mapRef.current) {
+        // 최초 지도 생성 시에만 중심 이동 및 마커 생성
+        setCurrentLat(lat);
+        setCurrentLng(lng);
+        setRealLat(lat);
+        setRealLng(lng);
+
         const map = new window.kakao.maps.Map(container, { center: moveLatLon, level: 3 });
         const marker = new window.kakao.maps.Marker({ position: moveLatLon, draggable: true });
         marker.setMap(map);
@@ -144,14 +147,15 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
         mapRef.current = map;
         markerRef.current = marker;
-      } else {
-        mapRef.current.setCenter(moveLatLon);
-        markerRef.current.setPosition(moveLatLon);
-      }
 
-      geocoder.coord2Address(lng, lat, (res, status) => {
-        if (status === window.kakao.maps.services.Status.OK) setAddress(res[0].address.address_name);
-      });
+        geocoder.coord2Address(lng, lat, (res, status) => {
+          if (status === window.kakao.maps.services.Status.OK) setAddress(res[0].address.address_name);
+        });
+      } else {
+        // 이후 GPS 업데이트 시에는 realLat/realLng(내 위치 버튼용)만 갱신, 지도는 그대로 유지
+        setRealLat(lat);
+        setRealLng(lng);
+      }
     };
 
     watchId = navigator.geolocation.watchPosition(
@@ -215,8 +219,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     if (probability <= 80) return { bg: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.25)", text: "#E67E22" };
     return { bg: "rgba(231,77,60,0.1)", border: "1px solid rgba(231,77,60,0.25)", text: "#E74D3C" };
   };
-  const roadviewPositionRef = useRef(null);
-
   const handleRoadview = () => {
     if (!window.kakao || !window.kakao.maps) {
       alert("카카오 지도를 불러오지 못했습니다.");
@@ -331,9 +333,8 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
               setShowParkingMarkers(next);
               showParkingMarkersRef.current = next;
               if (next) {
-                if (nearbyParkingRef.current.length > 0) {
-                  updateMarkerVisibility(nearbyParkingRef.current, true);
-                } else if (mapRef.current) {
+                // 항상 현재 지도 화면 중심 기준으로 주차장 조회
+                if (mapRef.current) {
                   const center = mapRef.current.getCenter();
                   fetchParkingData(center.getLat(), center.getLng());
                 }
