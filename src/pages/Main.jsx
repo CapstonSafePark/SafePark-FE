@@ -215,6 +215,8 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     if (probability <= 80) return { bg: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.25)", text: "#E67E22" };
     return { bg: "rgba(231,77,60,0.1)", border: "1px solid rgba(231,77,60,0.25)", text: "#E74D3C" };
   };
+  const roadviewPositionRef = useRef(null);
+
   const handleRoadview = () => {
     if (!window.kakao || !window.kakao.maps) {
       alert("카카오 지도를 불러오지 못했습니다.");
@@ -230,11 +232,27 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       const container = document.getElementById(containerId);
       if (!container) return;
       const position = new window.kakao.maps.LatLng(currentLat, currentLng);
+      roadviewPositionRef.current = position;
       roadviewRef.current = new window.kakao.maps.Roadview(container);
       roadviewClientRef.current = new window.kakao.maps.RoadviewClient();
       roadviewClientRef.current.getNearestPanoId(position, 50, (panoId) => {
         if (panoId) {
           roadviewRef.current.setPanoId(panoId, position);
+          // 로드뷰 내 이동 시 지도 마커 위치도 함께 업데이트
+          window.kakao.maps.event.addListener(roadviewRef.current, "position_changed", () => {
+            const rvPosition = roadviewRef.current.getPosition();
+            roadviewPositionRef.current = rvPosition;
+            if (mapRef.current && markerRef.current) {
+              markerRef.current.setPosition(rvPosition);
+              mapRef.current.setCenter(rvPosition);
+            }
+            setCurrentLat(rvPosition.getLat());
+            setCurrentLng(rvPosition.getLng());
+            const geocoder = new window.kakao.maps.services.Geocoder();
+            geocoder.coord2Address(rvPosition.getLng(), rvPosition.getLat(), (res, status) => {
+              if (status === window.kakao.maps.services.Status.OK) setAddress(res[0].address.address_name);
+            });
+          });
         } else {
           alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
         }
@@ -442,16 +460,35 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
               <div
                 style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
                 onClick={() => {
+                  // 로드뷰 내에서 이동한 현재 위치 기준으로 전체화면 열기
+                  const rvPos = roadviewPositionRef.current || new window.kakao.maps.LatLng(currentLat, currentLng);
                   setShowRoadview("full");
                   setTimeout(() => {
                     const container = document.getElementById("roadview-full");
                     if (!container) return;
-                    const position = new window.kakao.maps.LatLng(currentLat, currentLng);
                     const rv = new window.kakao.maps.Roadview(container);
                     const client = new window.kakao.maps.RoadviewClient();
-                    client.getNearestPanoId(position, 50, (panoId) => {
-                      if (panoId) rv.setPanoId(panoId, position);
-                      else alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
+                    client.getNearestPanoId(rvPos, 50, (panoId) => {
+                      if (panoId) {
+                        rv.setPanoId(panoId, rvPos);
+                        // 전체화면에서도 이동 시 지도 마커 연동
+                        window.kakao.maps.event.addListener(rv, "position_changed", () => {
+                          const newPos = rv.getPosition();
+                          roadviewPositionRef.current = newPos;
+                          if (mapRef.current && markerRef.current) {
+                            markerRef.current.setPosition(newPos);
+                            mapRef.current.setCenter(newPos);
+                          }
+                          setCurrentLat(newPos.getLat());
+                          setCurrentLng(newPos.getLng());
+                          const geocoder = new window.kakao.maps.services.Geocoder();
+                          geocoder.coord2Address(newPos.getLng(), newPos.getLat(), (res, status) => {
+                            if (status === window.kakao.maps.services.Status.OK) setAddress(res[0].address.address_name);
+                          });
+                        });
+                      } else {
+                        alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
+                      }
                     });
                   }, 100);
                 }}

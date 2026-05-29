@@ -29,7 +29,7 @@ export default function Register({ setPage }) {
         alert("회원가입 완료!");
         setPage("login");
       } else {
-        alert(data.message || "회원가입 실패");
+        alert(data.error || data.message || "회원가입 실패");
       }
     } catch (e) {
       alert("서버 연결 실패");
@@ -49,14 +49,14 @@ export default function Register({ setPage }) {
         />
         <input
           style={styles.input}
-          placeholder="이메일"
+          placeholder="예) example@email.com"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <div style={{ position: "relative" }}>
           <input
             style={{ ...styles.input, paddingRight: 40 }}
             type={showPassword ? "text" : "password"}
-            placeholder="비밀번호"
+            placeholder="비밀번호는 8자 이상이어야 합니다"
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
           <span
@@ -75,7 +75,7 @@ export default function Register({ setPage }) {
         />
         <input
           style={styles.input}
-          placeholder="전화번호"
+          placeholder="예) 010-1234-5678"
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />
       </div>
