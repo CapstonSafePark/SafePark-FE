@@ -93,7 +93,7 @@ export const getStyles = (t) => ({
   input: { padding: "12px", borderRadius: "10px", border: `1px solid ${t.inputBorder}`, background: t.inputBg, color: t.textPrimary, fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" },
   switchText: { textAlign: "center", fontSize: "12px", color: t.textSecondary },
   link: { color: t.accent, cursor: "pointer", fontWeight: 600 },
-  smallBtn: { marginTop: "8px", padding: "10px", width: "100%", borderRadius: "8px", border: "none", background: t.smallBtnBg, color: t.textPrimary, cursor: "pointer", fontSize: 13 },
+  smallBtn: { marginTop: "8px", padding: "10px", width: "100%", borderRadius: "8px", border: "none", background: t.smallBtnBg, color: t.textPrimary, cursor: "pointer", fontSize: 13, transition: "opacity 0.15s" },
   badge: { borderRadius: "20px", padding: "4px 10px", fontSize: "11px", fontWeight: "600" },
   badgeDanger: { background: "rgba(231,77,60,0.15)", border: "1px solid rgba(231,77,60,0.3)", color: t.danger },
   badgeWarning: { background: "rgba(243,156,18,0.15)", border: "1px solid rgba(243,156,18,0.3)", color: t.warning },
@@ -109,7 +109,7 @@ export const getStyles = (t) => ({
   historyBtnRow: { display: "flex", gap: "8px", marginTop: "10px" },
   detailBtn: { flex: 1, padding: "8px", borderRadius: "8px", border: `1px solid ${t.accent}`, background: "transparent", color: t.accent, cursor: "pointer", fontSize: 13, transition: "background 0.15s, color 0.15s" },
   deleteBtn: { flex: 1, padding: "8px", borderRadius: "8px", border: `1px solid ${t.danger}`, background: "transparent", color: t.danger, cursor: "pointer", fontSize: 13, transition: "background 0.15s, color 0.15s" },
-  allDeleteBtn: { marginTop: "12px", width: "100%", padding: "10px", borderRadius: "10px", border: "none", background: t.danger, color: "#fff", cursor: "pointer", fontSize: 13, transition: "opacity 0.15s" },  withdrawBtn: { marginTop: "8px", padding: "10px", width: "100%", borderRadius: "8px", border: `1px solid rgba(231,77,60,0.4)`, background: "transparent", color: t.danger, cursor: "pointer", fontSize: 13 },
-  infoRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${t.border}` },
+  allDeleteBtn: { marginTop: "12px", width: "100%", padding: "10px", borderRadius: "10px", border: "none", background: t.danger, color: "#fff", cursor: "pointer", fontSize: 13, transition: "opacity 0.15s" },  
+  withdrawBtn: { marginTop: "8px", padding: "10px", width: "100%", borderRadius: "8px", border: `1px solid rgba(231,77,60,0.4)`, background: "transparent", color: t.danger, cursor: "pointer", fontSize: 13, transition: "background 0.15s, color 0.15s" },  infoRow: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: `1px solid ${t.border}` },
   infoValue: { fontSize: 13, color: t.textSecondary },
 });
