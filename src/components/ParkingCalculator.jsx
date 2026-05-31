@@ -24,6 +24,23 @@ export default function ParkingCalculator({ lot, onClose }) {
     return `${m}분`;
   };
 
+  // tickets 배열에서 종일권/당일권 찾기
+  const findAllDayTicket = () => {
+    if (!lot.tickets || lot.tickets.length === 0) return null;
+    return lot.tickets.find(t =>
+      t.name && (t.name.includes("종일") || t.name.includes("당일"))
+    ) || null;
+  };
+
+  // tickets 배열에서 월정기권 찾기
+  const findMonthlyTicket = () => {
+    if (!lot.tickets || lot.tickets.length === 0) return null;
+    return lot.tickets.find(t => t.name && t.name.includes("월정기")) || null;
+  };
+
+  const allDayTicket = findAllDayTicket();
+  const monthlyTicket = findMonthlyTicket();
+
   const calculate = () => {
     if (isFree) {
       setResult({ totalFee: 0, duration: 0, breakdown: [], message: "무료 주차장입니다" });
@@ -31,11 +48,19 @@ export default function ParkingCalculator({ lot, onClose }) {
     }
 
     if (isAllDay) {
-      const allDayFee = lot.allDayPrice || lot.maxDayPrice || null;
+      // tickets에서 종일권 우선, 없으면 기존 필드 fallback
+      const ticketFee = allDayTicket ? allDayTicket.price : null;
+      const fallbackFee = lot.allDayPrice || lot.maxDayPrice || null;
+      const allDayFee = ticketFee ?? fallbackFee;
+      const ticketLabel = allDayTicket ? allDayTicket.name : "종일권";
+      const usageLabel = allDayTicket ? allDayTicket.usagePeriodLabel : null;
+
       setResult({
         totalFee: allDayFee,
         duration: 1440,
-        breakdown: [{ label: "종일권", fee: allDayFee }],
+        breakdown: allDayFee
+          ? [{ label: ticketLabel + (usageLabel ? ` (${usageLabel})` : ""), fee: allDayFee }]
+          : [],
         message: allDayFee ? null : "종일권 요금 정보가 없습니다",
       });
       return;
@@ -131,32 +156,49 @@ export default function ParkingCalculator({ lot, onClose }) {
               {lot.feeUnit && <div style={{ color: theme.textSecondary, fontSize: 12 }}>기본 {lot.feeUnit}분 {Number(lot.lotPrice).toLocaleString()}원</div>}
               {lot.addUnitTime && <div style={{ color: theme.textSecondary, fontSize: 12 }}>추가 {lot.addUnitTime}분당 {Number(lot.addUnitPrice).toLocaleString()}원</div>}
               {lot.maxDayPrice && <div style={{ color: theme.textSecondary, fontSize: 12 }}>일일 최대 {Number(lot.maxDayPrice).toLocaleString()}원</div>}
+              {/* tickets 정보 표시 */}
+              {allDayTicket && (
+                <div style={{ color: theme.textSecondary, fontSize: 12 }}>
+                  {allDayTicket.name} {Number(allDayTicket.price).toLocaleString()}원 ({allDayTicket.usagePeriodLabel})
+                </div>
+              )}
+              {monthlyTicket && (
+                <div style={{ color: theme.textSecondary, fontSize: 12 }}>
+                  {monthlyTicket.name} {Number(monthlyTicket.price).toLocaleString()}원 ({monthlyTicket.usagePeriodLabel})
+                </div>
+              )}
             </>
           )}
         </div>
 
-        {/* 종일권 토글 */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, padding: "10px 12px", background: "rgba(255,255,255,0.04)", borderRadius: 10, border: `1px solid ${theme.border}` }}>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: theme.textPrimary }}>종일권</div>
-            <div style={{ fontSize: 11, color: theme.textMuted }}>하루 종일 주차 요금</div>
+        {/* 종일권 토글 - tickets에 종일권 있거나 기존 필드 있을 때 표시 */}
+        {(allDayTicket || lot.allDayPrice || lot.maxDayPrice) && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, padding: "10px 12px", background: "rgba(255,255,255,0.04)", borderRadius: 10, border: `1px solid ${theme.border}` }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: theme.textPrimary }}>종일권</div>
+              <div style={{ fontSize: 11, color: theme.textMuted }}>
+                {allDayTicket
+                  ? `${Number(allDayTicket.price).toLocaleString()}원 · ${allDayTicket.usagePeriodLabel}`
+                  : "하루 종일 주차 요금"}
+              </div>
+            </div>
+            <div
+              onClick={() => { setIsAllDay(!isAllDay); setResult(null); }}
+              style={{
+                width: 44, height: 24, borderRadius: 12,
+                background: isAllDay ? theme.accent : theme.border,
+                position: "relative", cursor: "pointer", transition: "background 0.2s",
+              }}
+            >
+              <div style={{
+                position: "absolute", top: 2,
+                left: isAllDay ? 22 : 2,
+                width: 20, height: 20, borderRadius: "50%",
+                background: "#fff", transition: "left 0.2s",
+              }} />
+            </div>
           </div>
-          <div
-            onClick={() => { setIsAllDay(!isAllDay); setResult(null); }}
-            style={{
-              width: 44, height: 24, borderRadius: 12,
-              background: isAllDay ? theme.accent : theme.border,
-              position: "relative", cursor: "pointer", transition: "background 0.2s",
-            }}
-          >
-            <div style={{
-              position: "absolute", top: 2,
-              left: isAllDay ? 22 : 2,
-              width: 20, height: 20, borderRadius: "50%",
-              background: "#fff", transition: "left 0.2s",
-            }} />
-          </div>
-        </div>
+        )}
 
         {!isAllDay && (
           <>
