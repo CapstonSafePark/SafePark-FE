@@ -267,13 +267,7 @@ export default function HistoryDetail({ setPage, result }) {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
                   <div style={{ ...parkingStyles.priceText, textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>
-                    {isFree ? "무료" : (
-                      lot.parkingFeeDesc
-                        ? lot.parkingFeeDesc.replace(/\s*추가요금:/g, " / 추가요금:").trim()
-                        : lot.feeUnit
-                        ? `기본 ${lot.feeUnit}분 ${lot.lotPrice}원`
-                        : "요금 정보 없음"
-                    )}
+                    {isFree ? "무료" : lot.feeUnit && lot.lotPrice ? `기본 ${lot.feeUnit}분 ${Number(lot.lotPrice).toLocaleString()}원` : "요금 정보 없음"}
                   </div>
                   {!isFree && lot.addUnitTime && lot.addUnitPrice && (
                     <div style={{ fontSize: 10, color: theme.textMuted, textAlign: "right" }}>
