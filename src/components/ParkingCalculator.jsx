@@ -24,7 +24,6 @@ export default function ParkingCalculator({ lot, onClose }) {
     return `${m}분`;
   };
 
-  // tickets 배열에서 종일권/당일권 찾기
   const findAllDayTicket = () => {
     if (!lot.tickets || lot.tickets.length === 0) return null;
     return lot.tickets.find(t =>
@@ -32,7 +31,6 @@ export default function ParkingCalculator({ lot, onClose }) {
     ) || null;
   };
 
-  // tickets 배열에서 월정기권 찾기
   const findMonthlyTicket = () => {
     if (!lot.tickets || lot.tickets.length === 0) return null;
     return lot.tickets.find(t => t.name && t.name.includes("월정기")) || null;
@@ -48,7 +46,6 @@ export default function ParkingCalculator({ lot, onClose }) {
     }
 
     if (isAllDay) {
-      // tickets에서 종일권 우선, 없으면 기존 필드 fallback
       const ticketFee = allDayTicket ? allDayTicket.price : null;
       const fallbackFee = lot.allDayPrice || lot.maxDayPrice || null;
       const allDayFee = ticketFee ?? fallbackFee;
@@ -123,15 +120,29 @@ export default function ParkingCalculator({ lot, onClose }) {
   const rowStyle = { display: "flex", gap: 8 };
 
   return (
-    <div style={{
-      position: "fixed", top: 0, left: "50%", transform: "translateX(-50%)",
-      width: "375px", height: "100vh", background: "rgba(0,0,0,0.5)",
-      zIndex: 200, display: "flex", alignItems: "flex-end",
-    }}>
+    // ✅ 바텀 시트 → 화면 중앙 모달로 변경
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.5)",
+        zIndex: 200,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0 20px",
+      }}
+    >
       <div style={{
-        width: "100%", background: theme.card, borderRadius: "20px 20px 0 0",
-        padding: "20px 16px 40px", border: `1px solid ${theme.border}`,
-        maxHeight: "85vh", overflowY: "auto",
+        width: "100%",
+        maxWidth: "375px",
+        background: theme.card,
+        borderRadius: 20,
+        padding: "20px 16px 32px",
+        border: `1px solid ${theme.border}`,
+        maxHeight: "85vh",
+        overflowY: "auto",
       }}>
         {/* 헤더 */}
         <div style={{ ...styles.rowBetween, marginBottom: 16 }}>
@@ -156,7 +167,6 @@ export default function ParkingCalculator({ lot, onClose }) {
               {lot.feeUnit && <div style={{ color: theme.textSecondary, fontSize: 12 }}>기본 {lot.feeUnit}분 {Number(lot.lotPrice).toLocaleString()}원</div>}
               {lot.addUnitTime && <div style={{ color: theme.textSecondary, fontSize: 12 }}>추가 {lot.addUnitTime}분당 {Number(lot.addUnitPrice).toLocaleString()}원</div>}
               {lot.maxDayPrice && <div style={{ color: theme.textSecondary, fontSize: 12 }}>일일 최대 {Number(lot.maxDayPrice).toLocaleString()}원</div>}
-              {/* tickets 정보 표시 */}
               {allDayTicket && (
                 <div style={{ color: theme.textSecondary, fontSize: 12 }}>
                   {allDayTicket.name} {Number(allDayTicket.price).toLocaleString()}원 ({allDayTicket.usagePeriodLabel})
@@ -171,7 +181,7 @@ export default function ParkingCalculator({ lot, onClose }) {
           )}
         </div>
 
-        {/* 종일권 토글 - tickets에 종일권 있거나 기존 필드 있을 때 표시 */}
+        {/* 종일권 토글 */}
         {(allDayTicket || lot.allDayPrice || lot.maxDayPrice) && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, padding: "10px 12px", background: "rgba(255,255,255,0.04)", borderRadius: 10, border: `1px solid ${theme.border}` }}>
             <div>

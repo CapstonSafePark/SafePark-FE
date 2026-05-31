@@ -69,10 +69,11 @@ export default function History({ setPage, history, setHistory, setResult }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleDeleteHistory = async (historyId, idx) => {
+  // ✅ idx 대신 id 기반 + prev 사용으로 클로저 버그 수정
+  const handleDeleteHistory = async (historyId) => {
     try {
       const response = await deleteHistory(historyId);
-      if (response.ok) setHistory(history.filter((_, i) => i !== idx));
+      if (response.ok) setHistory(prev => prev.filter((h) => h.id !== historyId));
       else alert("삭제 실패");
     } catch (e) {
       alert("서버 연결 실패");
@@ -106,7 +107,7 @@ export default function History({ setPage, history, setHistory, setResult }) {
         )}
 
         {history.map((h, i) => (
-          <div key={i} style={styles.historyCard}>
+          <div key={h.id ?? i} style={styles.historyCard}>
             <div style={styles.historyDate}>{h.date}</div>
             <div style={styles.historyAddress}>{h.address}</div>
             <div style={{
@@ -134,30 +135,30 @@ export default function History({ setPage, history, setHistory, setResult }) {
               </button>
               <button
                 style={styles.deleteBtn}
-                onClick={() => handleDeleteHistory(h.id, i)}
+                onClick={() => handleDeleteHistory(h.id)}
                 onMouseEnter={e => { e.currentTarget.style.background = theme.danger; e.currentTarget.style.color = "#fff"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = theme.danger; }}
                 onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
                 onMouseUp={e => e.currentTarget.style.opacity = "1"}
               >
                 삭제
-              </button>                          
+              </button>
             </div>
           </div>
         ))}
 
-      {history.length > 0 && (
-        <button
-          style={styles.allDeleteBtn}
-          onClick={handleDeleteAllHistory}
-          onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
-          onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-          onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
-          onMouseUp={e => e.currentTarget.style.opacity = "0.85"}
-        >
-          전체 삭제
-        </button>
-      )}
+        {history.length > 0 && (
+          <button
+            style={styles.allDeleteBtn}
+            onClick={handleDeleteAllHistory}
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
+            onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+            onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
+            onMouseUp={e => e.currentTarget.style.opacity = "0.85"}
+          >
+            전체 삭제
+          </button>
+        )}
       </div>
 
       <div style={{ height: 80 }} />
