@@ -270,6 +270,15 @@ export default function HistoryDetail({ setPage, result }) {
                     {isFree ? "무료" : priceText}
                   </div>
                   <div style={parkingStyles.priceUnit}>{isFree ? "" : unitText}</div>
+                  {lot.tickets && lot.tickets.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, marginTop: 2 }}>
+                      {lot.tickets.map((ticket, i) => (
+                        <div key={i} style={{ fontSize: 10, color: theme.textSecondary, background: "rgba(79,142,247,0.08)", borderRadius: 6, padding: "2px 7px", border: `1px solid rgba(79,142,247,0.2)` }}>
+                          {ticket.name} {ticket.price.toLocaleString()}원 · {ticket.usagePeriodLabel}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {!isFree && lot.feeUnit && (
                     <button
                       onClick={() => setSelectedLot(lot)}
@@ -324,6 +333,19 @@ export default function HistoryDetail({ setPage, result }) {
               ? `기본 ${mapSelectedLot.feeUnit}분 ${mapSelectedLot.lotPrice}원\n추가 ${mapSelectedLot.addUnitTime}분당 ${mapSelectedLot.addUnitPrice}원`
               : "요금 정보 없음"}
           </div>
+          {mapSelectedLot.tickets && mapSelectedLot.tickets.length > 0 && (
+            <div style={{ marginTop: 8 }}>
+              <div style={{ fontSize: 11, color: theme.textMuted, marginBottom: 4 }}>주차권</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {mapSelectedLot.tickets.map((ticket, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "rgba(79,142,247,0.08)", borderRadius: 8, padding: "5px 10px", border: `1px solid rgba(79,142,247,0.2)` }}>
+                    <span style={{ fontSize: 11, color: theme.textSecondary }}>{ticket.name}</span>
+                    <span style={{ fontSize: 11, color: theme.accent, fontWeight: 600 }}>{ticket.price.toLocaleString()}원 · {ticket.usagePeriodLabel}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {!(mapSelectedLot.parkingFeeDesc?.includes("무료") || mapSelectedLot.freeYn) && mapSelectedLot.feeUnit && (
             <button
               onClick={() => { setSelectedLot(mapSelectedLot); setMapSelectedLot(null); }}
