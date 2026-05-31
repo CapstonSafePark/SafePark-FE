@@ -248,9 +248,9 @@ export default function HistoryDetail({ setPage, result }) {
           {sortedNearbyParking.map((lot) => {
             const isFree = (lot.parkingFeeDesc && lot.parkingFeeDesc.includes("무료")) || lot.freeYn === true;
             const priceText = lot.parkingFeeDesc
-              ? lot.parkingFeeDesc.replace(/\s*추가요금:/g, "\n추가요금:").trim()
+              ? lot.parkingFeeDesc.replace(/\s*추가요금:/g, " / 추가요금:").trim()
               : lot.feeUnit
-              ? `기본 ${lot.feeUnit}분 ${lot.lotPrice}원\n추가 ${lot.addUnitTime}분당 ${lot.addUnitPrice}원`
+              ? `기본 ${lot.feeUnit}분 ${lot.lotPrice}원 / 추가 ${lot.addUnitTime}분당 ${lot.addUnitPrice}원`
               : "요금 정보 없음";
             const unitText = lot.feeUnit ? `기본 ${lot.feeUnit}분` : "기본요금";
             return (
@@ -266,7 +266,7 @@ export default function HistoryDetail({ setPage, result }) {
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-                  <div style={{ ...parkingStyles.priceText, whiteSpace: "pre-line", wordBreak: "keep-all", textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>
+                  <div style={{ ...parkingStyles.priceText, textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>
                     {isFree ? "무료" : priceText}
                   </div>
                   <div style={parkingStyles.priceUnit}>{isFree ? "" : unitText}</div>
