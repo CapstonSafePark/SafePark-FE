@@ -632,8 +632,20 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
-                  <div style={{ ...parkingStyles.priceText, textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>{isFree ? "무료" : priceText}</div>
-                  <div style={parkingStyles.priceUnit}>{isFree ? "" : unitText}</div>
+                  <div style={{ ...parkingStyles.priceText, textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>
+                    {isFree ? "무료" : (
+                      lot.parkingFeeDesc
+                        ? lot.parkingFeeDesc.replace(/\s*추가요금:/g, " / 추가요금:").trim()
+                        : lot.feeUnit
+                        ? `기본 ${lot.feeUnit}분 ${lot.lotPrice}원`
+                        : "요금 정보 없음"
+                    )}
+                  </div>
+                  {!isFree && lot.addUnitTime && lot.addUnitPrice && (
+                    <div style={{ fontSize: 10, color: theme.textMuted, textAlign: "right" }}>
+                      추가 {lot.addUnitTime}분당 {Number(lot.addUnitPrice).toLocaleString()}원
+                    </div>
+                  )}
                   {lot.tickets && lot.tickets.length > 0 && (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, marginTop: 2 }}>
                       {lot.tickets.map((ticket, i) => (
