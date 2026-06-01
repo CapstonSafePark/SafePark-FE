@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ThemeProvider } from "./ThemeContext";
 import { useTheme } from "./ThemeContext";
 import Login from "./pages/Login";
@@ -12,13 +12,25 @@ import History from "./pages/History";
 function AppInner() {
   const { styles, isDark } = useTheme();
   const [page, setPage] = useState("login");
+  const frameRef = useRef(null);
+  const scrollPositions = useRef({});
 
   const handleSetPage = (newPage) => {
+    // 현재 페이지 스크롤 위치 저장
+    if (frameRef.current) {
+      scrollPositions.current[page] = frameRef.current.scrollTop;
+    }
     setPage(newPage);
     setTimeout(() => {
-      const frame = document.querySelector(".dark-mode, .light-mode");
-      if (frame) frame.scrollTop = 0;
+      if (frameRef.current) {
+        // 이전에 저장된 스크롤 위치 복원 (없으면 0)
+        frameRef.current.scrollTop = scrollPositions.current[newPage] ?? 0;
+      }
     }, 0);
+  };
+
+  const handleScrollToTop = () => {
+    if (frameRef.current) frameRef.current.scrollTop = 0;
   };
   const [user, setUser] = useState(null);
   const [result, setResult] = useState(null);
@@ -27,7 +39,7 @@ function AppInner() {
 
   return (
     <div style={styles.wrapper}>
-      <div style={styles.frame} className={isDark ? "dark-mode" : "light-mode"}>
+      <div ref={frameRef} style={styles.frame} className={isDark ? "dark-mode" : "light-mode"}>
         {page === "login" && <Login setPage={handleSetPage} setUser={setUser} />}
         {page === "register" && <Register setPage={handleSetPage} />}
         {page === "main" && (
@@ -64,7 +76,7 @@ function AppInner() {
           />
         )}
         {page !== "login" && page !== "register" && (
-          <TabBar page={page} setPage={handleSetPage} />
+          <TabBar page={page} setPage={handleSetPage} onScrollToTop={handleScrollToTop} />
         )}
       </div>
     </div>

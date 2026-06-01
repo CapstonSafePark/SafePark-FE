@@ -1,7 +1,7 @@
 import { HiHome, HiClipboardList, HiUser } from "react-icons/hi";
 import { useTheme } from "../ThemeContext";
 
-export default function TabBar({ page, setPage }) {
+export default function TabBar({ page, setPage, onScrollToTop }) {
   const { theme } = useTheme();
 
   const tabs = [
@@ -38,7 +38,14 @@ export default function TabBar({ page, setPage }) {
             flex: 1,
             color: page === tab.id ? theme.accent : theme.textMuted,
           }}
-          onClick={() => setPage(tab.id)}
+          onClick={() => {
+            if (page === tab.id) {
+              // 현재 페이지 탭 한 번 더 누르면 맨 위로
+              if (onScrollToTop) onScrollToTop();
+            } else {
+              setPage(tab.id);
+            }
+          }}
         >
           <tab.icon size={22} />
           <div style={{ fontSize: 10, fontWeight: 600 }}>{tab.label}</div>
