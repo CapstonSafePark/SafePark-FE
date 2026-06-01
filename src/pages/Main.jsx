@@ -538,6 +538,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       </button>      
 
       {/* 분석 결과 */}
+      {result && console.log("메인 imagePath:", result.imagePath)}
       {result && (
         <div style={styles.resultCard}>
           <div style={styles.rowBetween}>
