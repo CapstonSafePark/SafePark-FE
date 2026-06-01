@@ -83,7 +83,7 @@ export const getStyles = (t) => ({
   resultCard: { background: t.card, padding: "16px", borderRadius: "14px", border: `1px solid ${t.border}` },
   rowBetween: { display: "flex", justifyContent: "space-between", alignItems: "center" },
   title: { fontSize: "14px", fontWeight: "700", color: t.textPrimary },
-  subCard: { marginTop: "10px", padding: "10px", background: t.cardSub, borderRadius: "8px", fontSize: "11px", color: t.textSecondary, border: `1px solid ${t.border}` },
+  subCard: { marginTop: "10px", padding: "10px", background: t.cardSub, borderRadius: "8px", fontSize: "11px", color: t.textPrimary, border: `1px solid ${t.border}`, fontWeight: "600" },
   detailWrap: { marginTop: "10px", display: "flex", flexDirection: "column", gap: "8px" },
   redCard: { padding: "12px", background: "rgba(231,77,60,0.07)", borderRadius: "10px" },
   yellowCard: { padding: "12px", background: "rgba(239,153,39,0.07)", borderRadius: "10px" },
