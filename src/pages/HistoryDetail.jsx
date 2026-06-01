@@ -156,7 +156,7 @@ export default function HistoryDetail({ setPage, result }) {
 
       {/* 분석 위치 카드 */}
       <div style={styles.locationCard}>
-        <div style={{ fontSize: 10, color: theme.accent }}>분석 위치</div>
+        <div style={{ fontSize: 10, color: theme.accent, fontWeight: "600" }}>분석 위치</div>
         <div style={{ fontSize: 12, color: theme.textSecondary, fontWeight: "600" }}>{result.address || "주소 없음"}</div>
       </div>
 
