@@ -16,25 +16,18 @@ function AppInner() {
     document.body.style.background = isDark ? "#0F0F1E" : "#F0F4FF";
   }, [isDark]);
   const [page, setPage] = useState("login");
-  const frameRef = useRef(null);
   const scrollPositions = useRef({});
 
   const handleSetPage = (newPage) => {
-    // 현재 페이지 스크롤 위치 저장
-    if (frameRef.current) {
-      scrollPositions.current[page] = frameRef.current.scrollTop;
-    }
+    scrollPositions.current[page] = window.scrollY;
     setPage(newPage);
     setTimeout(() => {
-      if (frameRef.current) {
-        // 이전에 저장된 스크롤 위치 복원 (없으면 0)
-        frameRef.current.scrollTop = scrollPositions.current[newPage] ?? 0;
-      }
+      window.scrollTo(0, scrollPositions.current[newPage] ?? 0);
     }, 0);
   };
 
   const handleScrollToTop = () => {
-    if (frameRef.current) frameRef.current.scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const [user, setUser] = useState(null);
   const [result, setResult] = useState(null);
@@ -43,7 +36,7 @@ function AppInner() {
 
   return (
     <div style={styles.wrapper}>
-      <div ref={frameRef} style={styles.frame} className={isDark ? "dark-mode" : "light-mode"}>
+      <div style={styles.frame} className={isDark ? "dark-mode" : "light-mode"}>
         {page === "login" && <Login setPage={handleSetPage} setUser={setUser} />}
         {page === "register" && <Register setPage={handleSetPage} />}
         {page === "main" && (
