@@ -9,8 +9,6 @@ import {
 } from "react-icons/md";
 import ParkingCalculator from "../components/ParkingCalculator";
 
-const BASE_URL = "https://safepark.duckdns.org";
-
 export default function Main({ setPage, history, setHistory, result, setResult, fromHistory, setFromHistory }) {
   const { styles, theme } = useTheme();
 
@@ -40,6 +38,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   const [parkingSortType, setParkingSortType] = useState("distance");
   const [showParkingMarkers, setShowParkingMarkers] = useState(false);
   const [showRoadview, setShowRoadview] = useState(false);
+  const [screenshotPreview, setScreenshotPreview] = useState(null);
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -136,13 +135,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (res, status) => {
             if (status === window.kakao.maps.services.Status.OK) setAddress(res[0].address.address_name);
           });
-          // 로드뷰가 열려있으면 위치 업데이트
-          if (roadviewRef.current && roadviewClientRef.current) {
-            roadviewClientRef.current.getNearestPanoId(latlng, 50, (panoId) => {
-              if (panoId) roadviewRef.current.setPanoId(panoId, latlng);
-              else alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
-            });
-          }
         });
 
         window.kakao.maps.event.addListener(marker, "dragend", () => {
@@ -152,13 +144,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           geocoder.coord2Address(pos.getLng(), pos.getLat(), (res, status) => {
             if (status === window.kakao.maps.services.Status.OK) setAddress(res[0].address.address_name);
           });
-          // 로드뷰가 열려있으면 위치 업데이트
-          if (roadviewRef.current && roadviewClientRef.current) {
-            roadviewClientRef.current.getNearestPanoId(pos, 50, (panoId) => {
-              if (panoId) roadviewRef.current.setPanoId(panoId, pos);
-              else alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
-            });
-          }
         });
 
         mapRef.current = map;
@@ -235,6 +220,31 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     if (probability <= 80) return { bg: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.25)", text: "#E67E22" };
     return { bg: "rgba(231,77,60,0.1)", border: "1px solid rgba(231,77,60,0.25)", text: "#E74D3C" };
   };
+  const handleScreenshot = async (containerId) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    try {
+      const html2canvas = (await import("https://esm.sh/html2canvas@1.4.1")).default;
+      const canvas = await html2canvas(container, { useCORS: true, allowTaint: true });
+      // 4:3 가로 비율로 크롭
+      const srcW = canvas.width;
+      const srcH = canvas.height;
+      const targetRatio = 4 / 3;
+      let cropW = srcW;
+      let cropH = Math.round(srcW / targetRatio);
+      if (cropH > srcH) { cropH = srcH; cropW = Math.round(srcH * targetRatio); }
+      const offsetX = Math.round((srcW - cropW) / 2);
+      const offsetY = Math.round((srcH - cropH) / 2);
+      const out = document.createElement("canvas");
+      out.width = cropW;
+      out.height = cropH;
+      out.getContext("2d").drawImage(canvas, offsetX, offsetY, cropW, cropH, 0, 0, cropW, cropH);
+      setScreenshotPreview(out.toDataURL("image/png"));
+    } catch (e) {
+      alert("스크린샷 캡처에 실패했습니다.");
+    }
+  };
+
   const handleRoadview = () => {
     if (!window.kakao || !window.kakao.maps) {
       alert("카카오 지도를 불러오지 못했습니다.");
@@ -476,6 +486,10 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
             <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 6 }}>
               <div
                 style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
+                onClick={() => handleScreenshot("roadview")}
+              >📷 스크린샷</div>
+              <div
+                style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
                 onClick={() => {
                   // 로드뷰 내에서 이동한 현재 위치 기준으로 전체화면 열기
                   const rvPos = roadviewPositionRef.current || new window.kakao.maps.LatLng(currentLat, currentLng);
@@ -520,13 +534,45 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           {showRoadview === "full" && (
             <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "#000", zIndex: 999 }}>
               <div id="roadview-full" style={{ width: "100%", height: "100%" }} />
-              <div
-                style={{ position: "absolute", top: 16, right: 16, background: "rgba(0,0,0,0.6)", borderRadius: 8, padding: "6px 12px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, zIndex: 1000 }}
-                onClick={() => setShowRoadview(true)}
-              >✕ 닫기</div>
+              <div style={{ position: "absolute", top: 16, right: 16, display: "flex", gap: 8, zIndex: 1000 }}>
+                <div
+                  style={{ background: "rgba(0,0,0,0.6)", borderRadius: 8, padding: "6px 12px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600 }}
+                  onClick={() => handleScreenshot("roadview-full")}
+                >📷 스크린샷</div>
+                <div
+                  style={{ background: "rgba(0,0,0,0.6)", borderRadius: 8, padding: "6px 12px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600 }}
+                  onClick={() => setShowRoadview(true)}
+                >✕ 닫기</div>
+              </div>
             </div>
           )}
         </>
+      )}
+
+      {/* 스크린샷 미리보기 모달 */}
+      {screenshotPreview && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 20px" }}>
+          <div style={{ background: "#1A1A2E", borderRadius: 20, padding: 20, width: "100%", maxWidth: 400, border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#F0F0FF", marginBottom: 12 }}>스크린샷 미리보기</div>
+            <img src={screenshotPreview} alt="스크린샷" style={{ width: "100%", borderRadius: 10, marginBottom: 16, objectFit: "cover" }} />
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                onClick={() => {
+                  const link = document.createElement("a");
+                  link.href = screenshotPreview;
+                  link.download = `roadview_${Date.now()}.png`;
+                  link.click();
+                  setScreenshotPreview(null);
+                }}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: "none", background: "#4F8EF7", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+              >이 사진으로 저장</button>
+              <button
+                onClick={() => setScreenshotPreview(null)}
+                style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "#F0F0FF", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+              >다시 찍기</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* 분석/재분석 버튼 */}
@@ -548,7 +594,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       </button>      
 
       {/* 분석 결과 */}
-      {result && console.log("imagePath 확인:", result.imagePath)}
       {result && (
         <div style={styles.resultCard}>
           <div style={styles.rowBetween}>
@@ -602,16 +647,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                     <div style={styles.label}>주차선 판독</div>
                     <div style={textStyle}>{result.line || "업로드 된 사진 없음"}</div>
                   </div>
-                  {result.imagePath && (
-                    <div style={cardStyle}>
-                      <div style={styles.label}>업로드한 사진</div>
-                      <img
-                        src={`${BASE_URL}${result.imagePath}`}
-                        alt="분석 이미지"
-                        style={{ width: "100%", borderRadius: 10, marginTop: 6, objectFit: "cover" }}
-                      />
-                    </div>
-                  )}
                 </>
               );
             })()}
