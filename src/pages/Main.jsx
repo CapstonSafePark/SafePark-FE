@@ -299,6 +299,8 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         }
       }
       setResult(newResult);
+      setImage(null);
+      setImageFile(null);
       setHistory([
         { address, date: new Date().toLocaleDateString(), result: newResult.status, type: newResult.type, probability: newResult.probability, time: newResult.time, zone: newResult.zone, line: newResult.line, lat: currentLat, lng: currentLng, imagePath: newResult.imagePath || null },
         ...history,
