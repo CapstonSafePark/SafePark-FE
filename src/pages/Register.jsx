@@ -65,17 +65,17 @@ export default function Register({ setPage }) {
         </div>
         <input
           style={styles.input}
-          placeholder="이름"
+          placeholder="이름 : 예) 홍길동"
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
         <input
           style={styles.input}
-          placeholder="예) 010-1234-5678"
+          placeholder="전화번호 : 예) 010-1234-5678"
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
         />
         <input
           style={styles.input}
-          placeholder="예) example@email.com"
+          placeholder="이메일 : 예) example@email.com"
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
       </div>
