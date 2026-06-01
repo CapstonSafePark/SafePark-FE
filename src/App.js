@@ -12,6 +12,14 @@ import History from "./pages/History";
 function AppInner() {
   const { styles, isDark } = useTheme();
   const [page, setPage] = useState("login");
+
+  const handleSetPage = (newPage) => {
+    setPage(newPage);
+    setTimeout(() => {
+      const frame = document.querySelector(".dark-mode, .light-mode");
+      if (frame) frame.scrollTop = 0;
+    }, 0);
+  };
   const [user, setUser] = useState(null);
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
@@ -20,11 +28,11 @@ function AppInner() {
   return (
     <div style={styles.wrapper}>
       <div style={styles.frame} className={isDark ? "dark-mode" : "light-mode"}>
-        {page === "login" && <Login setPage={setPage} setUser={setUser} />}
-        {page === "register" && <Register setPage={setPage} />}
+        {page === "login" && <Login setPage={handleSetPage} setUser={setUser} />}
+        {page === "register" && <Register setPage={handleSetPage} />}
         {page === "main" && (
           <Main
-            setPage={setPage}
+            setPage={handleSetPage}
             history={history}
             setHistory={setHistory}
             result={result}
@@ -35,18 +43,18 @@ function AppInner() {
         )}
         {page === "history" && (
           <History
-            setPage={setPage}
+            setPage={handleSetPage}
             history={history}
             setHistory={setHistory}
             setResult={setResult}
           />
         )}
         {page === "historyDetail" && (
-          <HistoryDetail setPage={setPage} result={result} />
+          <HistoryDetail setPage={handleSetPage} result={result} />
         )}
         {page === "mypage" && (
           <MyPage
-            setPage={setPage}
+            setPage={handleSetPage}
             user={user}
             setUser={setUser}
             history={history}
@@ -56,7 +64,7 @@ function AppInner() {
           />
         )}
         {page !== "login" && page !== "register" && (
-          <TabBar page={page} setPage={setPage} />
+          <TabBar page={page} setPage={handleSetPage} />
         )}
       </div>
     </div>
