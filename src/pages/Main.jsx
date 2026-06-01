@@ -403,7 +403,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           onMouseUp={e => e.currentTarget.style.opacity = "0.75"}
         >
           <MdCameraAlt size={16} color={theme.accent} />
-          <span>{imageSource === "camera" && image ? "재촬영" : "카메라 촬영"}</span>
+          <span style={{ fontSize: 12, color: theme.accent, fontWeight: "600" }}>{imageSource === "camera" && image ? "재촬영" : "카메라 촬영"}</span>
         </div>
         <div
           style={{ ...styles.uploadBox, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "opacity 0.15s" }}
@@ -414,7 +414,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           onMouseUp={e => e.currentTarget.style.opacity = "0.75"}
         >
           <MdPhotoLibrary size={16} color={theme.accent} />
-          <span>{imageSource === "gallery" && image ? "다른 사진 선택" : "갤러리 업로드"}</span>
+          <span style={{ fontSize: 12, color: theme.accent, fontWeight: "600" }}>{imageSource === "gallery" && image ? "다른 사진 선택" : "갤러리 업로드"}</span>
         </div>
       </div>
 
