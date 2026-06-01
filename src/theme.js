@@ -91,7 +91,7 @@ export const getStyles = (t) => ({
   redText: { color: t.danger, fontSize: "12px", fontWeight: "600" },
   yellowText: { color: t.warning, fontSize: "12px" },
   inputWrap: { display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" },
-  input: { padding: "12px", borderRadius: "10px", border: `1px solid ${t.inputBorder}`, background: t.inputBg, color: t.textPrimary, fontSize: 14, outline: "none", width: "100%", boxSizing: "border-box" },
+  input: { padding: "12px", borderRadius: "10px", border: `1px solid ${t.inputBorder}`, background: t.inputBg, color: t.textPrimary, fontSize: 16, outline: "none", width: "100%", boxSizing: "border-box" },
   switchText: { textAlign: "center", fontSize: "12px", color: t.textSecondary },
   link: { color: t.accent, cursor: "pointer", fontWeight: 600 },
   smallBtn: { marginTop: "8px", padding: "10px", width: "100%", borderRadius: "8px", border: `1px solid ${t.accent}`, background: "transparent", color: t.accent, cursor: "pointer", fontSize: 13, transition: "background 0.15s, color 0.15s", fontWeight: "600" },
