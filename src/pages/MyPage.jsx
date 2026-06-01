@@ -107,26 +107,41 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
       {/* 화면 설정 */}
       <div style={{ ...styles.resultCard, marginBottom: 12 }}>
         <div style={styles.title}>화면 설정</div>
-        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0, marginTop: 12 }}>
           {[
-            { mode: "light", label: "라이트", icon: <MdLightMode size={16} color={themeMode === "light" ? "#fff" : "#F39C12"} /> },
-            { mode: "dark", label: "다크", icon: <MdDarkMode size={16} color={themeMode === "dark" ? "#fff" : "#4F8EF7"} /> },
-            { mode: "system", label: "기기 설정", icon: <MdSettingsBrightness size={16} color={themeMode === "system" ? "#fff" : theme.textSecondary} /> },
-          ].map(({ mode, label, icon }) => (
+            { mode: "light", label: "라이트 모드", icon: <MdLightMode size={16} color={themeMode === "light" ? theme.accent : theme.textMuted} /> },
+            { mode: "dark", label: "다크 모드", icon: <MdDarkMode size={16} color={themeMode === "dark" ? theme.accent : theme.textMuted} /> },
+            { mode: "system", label: "기기 설정", icon: <MdSettingsBrightness size={16} color={themeMode === "system" ? theme.accent : theme.textMuted} /> },
+          ].map(({ mode, label, icon }, i, arr) => (
             <div
               key={mode}
               onClick={() => setThemeMode(mode)}
               style={{
-                flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
-                padding: "10px 0", borderRadius: 12, cursor: "pointer",
-                background: themeMode === mode ? theme.accent : theme.cardSub,
-                border: `1px solid ${themeMode === mode ? theme.accent : theme.border}`,
-                color: themeMode === mode ? "#fff" : theme.textSecondary,
-                fontSize: 11, fontWeight: 600, transition: "all 0.15s",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "12px 4px",
+                borderBottom: i < arr.length - 1 ? `1px solid ${theme.border}` : "none",
+                cursor: "pointer",
               }}
             >
-              {icon}
-              {label}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {icon}
+                <span style={{ fontSize: 13, color: themeMode === mode ? theme.textPrimary : theme.textSecondary, fontWeight: themeMode === mode ? 600 : 400 }}>
+                  {label}
+                </span>
+              </div>
+              {/* 토글 스위치 */}
+              <div style={{
+                width: 44, height: 24, borderRadius: 12,
+                background: themeMode === mode ? theme.accent : theme.border,
+                position: "relative", transition: "background 0.2s",
+              }}>
+                <div style={{
+                  position: "absolute", top: 2,
+                  left: themeMode === mode ? 22 : 2,
+                  width: 20, height: 20, borderRadius: "50%",
+                  background: "#fff", transition: "left 0.2s",
+                }} />
+              </div>
             </div>
           ))}
         </div>
