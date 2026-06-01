@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { logout, getMyInfo, updateMyInfo, changePassword, deleteAccount } from "../api/auth";
 import { useTheme } from "../ThemeContext";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { MdDarkMode, MdLightMode } from "react-icons/md";
+import { MdDarkMode, MdLightMode, MdSettingsBrightness } from "react-icons/md";
 
 export default function MyPage({ setPage, user, setUser, setHistory }) {
-  const { styles, theme, isDark, toggleTheme } = useTheme();
+  const { styles, theme, isDark, themeMode, setThemeMode } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: user?.name || "", email: user?.email || "", phone: user?.phone || "" });
   const [currentPassword, setCurrentPassword] = useState("");
@@ -106,29 +106,29 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
 
       {/* 화면 설정 */}
       <div style={{ ...styles.resultCard, marginBottom: 12 }}>
-        <div style={styles.rowBetween}>
-          <div style={styles.title}>화면 설정</div>
-        </div>
-        <div style={{ ...styles.infoRow, borderBottom: "none", marginTop: 8 }}>
-          <span style={{ fontSize: 13, color: theme.textSecondary }}>
-            {isDark ? "다크 모드" : "라이트 모드"}
-          </span>
-          <div
-            onClick={toggleTheme}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              background: isDark ? theme.smallBtnBg : "#E8EAFF",
-              border: `1px solid ${theme.border}`,
-              borderRadius: 20, padding: "6px 14px",
-              cursor: "pointer", fontSize: 12,
-              color: theme.textPrimary, fontWeight: 600,
-            }}
-          >
-            {isDark
-              ? <><MdLightMode size={16} color="#F39C12" /> 라이트로 전환</>
-              : <><MdDarkMode size={16} color="#4F8EF7" /> 다크로 전환</>
-            }
-          </div>
+        <div style={styles.title}>화면 설정</div>
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          {[
+            { mode: "light", label: "라이트", icon: <MdLightMode size={16} color={themeMode === "light" ? "#fff" : "#F39C12"} /> },
+            { mode: "dark", label: "다크", icon: <MdDarkMode size={16} color={themeMode === "dark" ? "#fff" : "#4F8EF7"} /> },
+            { mode: "system", label: "기기 설정", icon: <MdSettingsBrightness size={16} color={themeMode === "system" ? "#fff" : theme.textSecondary} /> },
+          ].map(({ mode, label, icon }) => (
+            <div
+              key={mode}
+              onClick={() => setThemeMode(mode)}
+              style={{
+                flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                padding: "10px 0", borderRadius: 12, cursor: "pointer",
+                background: themeMode === mode ? theme.accent : theme.cardSub,
+                border: `1px solid ${themeMode === mode ? theme.accent : theme.border}`,
+                color: themeMode === mode ? "#fff" : theme.textSecondary,
+                fontSize: 11, fontWeight: 600, transition: "all 0.15s",
+              }}
+            >
+              {icon}
+              {label}
+            </div>
+          ))}
         </div>
       </div>
 
