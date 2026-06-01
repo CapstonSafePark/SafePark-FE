@@ -9,6 +9,8 @@ import {
 } from "react-icons/md";
 import ParkingCalculator from "../components/ParkingCalculator";
 
+const BASE_URL = "https://safepark.duckdns.org";
+
 export default function Main({ setPage, history, setHistory, result, setResult, fromHistory, setFromHistory }) {
   const { styles, theme } = useTheme();
 
@@ -412,8 +414,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         </div>
       </div>
 
-      {image && <img src={image} alt="preview" style={{ width: "100%", borderRadius: 10, marginBottom: 12 }} />}
-
       {/* 로드뷰 버튼 */}
       <div style={{ position: "relative", marginBottom: 12 }}>
         <div
@@ -514,6 +514,9 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
         </>
       )}
 
+      {/* 갤러리 업로드 이미지 미리보기 */}
+      {image && <img src={image} alt="preview" style={{ width: "100%", borderRadius: 10, marginBottom: 12 }} />}
+
       {/* 분석/재분석 버튼 */}
       <button
         style={{ ...styles.button, transition: "opacity 0.2s" }}
@@ -586,6 +589,16 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                     <div style={styles.label}>주차선 판독</div>
                     <div style={textStyle}>{result.line || "업로드 된 사진 없음"}</div>
                   </div>
+                  {result.imagePath && (
+                    <div style={cardStyle}>
+                      <div style={styles.label}>업로드한 사진</div>
+                      <img
+                        src={`${BASE_URL}${result.imagePath}`}
+                        alt="분석 이미지"
+                        style={{ width: "100%", borderRadius: 10, marginTop: 6, objectFit: "cover" }}
+                      />
+                    </div>
+                  )}
                 </>
               );
             })()}
