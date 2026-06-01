@@ -87,7 +87,7 @@ export const getStyles = (t) => ({
   detailWrap: { marginTop: "10px", display: "flex", flexDirection: "column", gap: "8px" },
   redCard: { padding: "12px", background: "rgba(231,77,60,0.07)", borderRadius: "10px" },
   yellowCard: { padding: "12px", background: "rgba(239,153,39,0.07)", borderRadius: "10px" },
-  label: { fontSize: "11px", color: t.textMuted, marginBottom: 2 },
+  label: { fontSize: "11px", color: t.textSecondary, marginBottom: 2, fontWeight: "600" },
   redText: { color: t.danger, fontSize: "12px", fontWeight: "600" },
   yellowText: { color: t.warning, fontSize: "12px" },
   inputWrap: { display: "flex", flexDirection: "column", gap: "10px", marginBottom: "16px" },
