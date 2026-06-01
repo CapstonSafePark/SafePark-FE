@@ -22,8 +22,8 @@ export default function TabBar({ page, setPage, onScrollToTop }) {
       borderTop: `1px solid ${theme.tabBarBorder}`,
       display: "flex",
       justifyContent: "space-around",
-      padding: "10px 0 0 0",
-      paddingBottom: "calc(20px + env(safe-area-inset-bottom))", // ← Safe Area 대응
+      padding: "6px 0 0 0",
+      paddingBottom: "calc(8px + env(safe-area-inset-bottom))", // ← Safe Area 대응
       zIndex: 100,
     }}>
       {tabs.map((tab) => (

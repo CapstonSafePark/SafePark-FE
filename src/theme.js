@@ -69,8 +69,8 @@ export const lightTheme = {
 };
 
 export const getStyles = (t) => ({
-  wrapper: { minWidth: "100vw", display: "flex", justifyContent: "center", background: t.wrapper },
-  frame: { width: "100%", maxWidth: "480px", background: t.frame, padding: "16px", paddingBottom: "100px", color: t.textPrimary, fontFamily: "Noto Sans KR", position: "relative", boxSizing: "border-box" },
+  wrapper: { minWidth: "100vw", minHeight: "100vh", display: "flex", justifyContent: "center", background: t.wrapper },
+  frame: { width: "100%", maxWidth: "480px", background: t.frame, padding: "12px 16px", paddingBottom: "80px", color: t.textPrimary, fontFamily: "Noto Sans KR", position: "relative", boxSizing: "border-box" },
   topbar: { marginBottom: 10, fontWeight: 800, fontSize: 18 },
   topbarRow: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   logoText: { fontWeight: 800, fontSize: 18 },
