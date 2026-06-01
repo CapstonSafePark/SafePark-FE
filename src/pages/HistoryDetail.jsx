@@ -160,11 +160,6 @@ export default function HistoryDetail({ setPage, result }) {
         <div style={{ fontSize: 12, color: theme.textSecondary, fontWeight: "600" }}>{result.address || "주소 없음"}</div>
       </div>
 
-      {/* 분석 이미지 */}
-      {result.imagePath && (
-        <img src={`${BASE_URL}${result.imagePath}`} alt="분석 이미지" style={{ width: "100%", borderRadius: 10, marginBottom: 12 }} />
-      )}
-
       {/* 분석 결과 카드 */}
       <div style={styles.resultCard}>
         <div style={styles.rowBetween}>
@@ -220,6 +215,16 @@ export default function HistoryDetail({ setPage, result }) {
                   <div style={styles.label}>주차선 판독</div>
                   <div style={textStyle}>{result.line && result.line !== "-" ? result.line : "업로드 된 사진 없음"}</div>
                 </div>
+                {result.imagePath && (
+                  <div style={cardStyle}>
+                    <div style={styles.label}>업로드한 사진</div>
+                    <img
+                      src={`${BASE_URL}${result.imagePath}`}
+                      alt="분석 이미지"
+                      style={{ width: "100%", borderRadius: 10, marginTop: 6, objectFit: "cover" }}
+                    />
+                  </div>
+                )}
               </>
             );
           })()}

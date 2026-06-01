@@ -17,10 +17,10 @@ export default function Register({ setPage }) {
 
   const handleRegister = async () => {
     if (!form.username.trim()) return alert("아이디를 입력해주세요");
-    if (!form.email.trim()) return alert("이메일을 입력해주세요");
     if (!form.password.trim()) return alert("비밀번호를 입력해주세요");
     if (!form.name.trim()) return alert("이름을 입력해주세요");
     if (!form.phone.trim()) return alert("전화번호를 입력해주세요");
+    if (!form.email.trim()) return alert("이메일을 입력해주세요");
 
     try {
       const response = await register(form);
@@ -47,11 +47,6 @@ export default function Register({ setPage }) {
           placeholder="아이디"
           onChange={(e) => setForm({ ...form, username: e.target.value })}
         />
-        <input
-          style={styles.input}
-          placeholder="예) example@email.com"
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
         <div style={{ position: "relative" }}>
           <input
             style={{ ...styles.input, paddingRight: 40 }}
@@ -77,6 +72,11 @@ export default function Register({ setPage }) {
           style={styles.input}
           placeholder="예) 010-1234-5678"
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
+        />
+        <input
+          style={styles.input}
+          placeholder="예) example@email.com"
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
       </div>
       <button style={styles.button} onClick={handleRegister}>회원가입</button>

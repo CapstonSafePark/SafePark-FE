@@ -9,6 +9,8 @@ import {
 } from "react-icons/md";
 import ParkingCalculator from "../components/ParkingCalculator";
 
+const BASE_URL = "https://safepark.duckdns.org";
+
 export default function Main({ setPage, history, setHistory, result, setResult, fromHistory, setFromHistory }) {
   const { styles, theme } = useTheme();
 
@@ -134,6 +136,13 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           geocoder.coord2Address(latlng.getLng(), latlng.getLat(), (res, status) => {
             if (status === window.kakao.maps.services.Status.OK) setAddress(res[0].address.address_name);
           });
+          // 로드뷰가 열려있으면 위치 업데이트
+          if (roadviewRef.current && roadviewClientRef.current) {
+            roadviewClientRef.current.getNearestPanoId(latlng, 50, (panoId) => {
+              if (panoId) roadviewRef.current.setPanoId(panoId, latlng);
+              else alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
+            });
+          }
         });
 
         window.kakao.maps.event.addListener(marker, "dragend", () => {
@@ -143,6 +152,13 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           geocoder.coord2Address(pos.getLng(), pos.getLat(), (res, status) => {
             if (status === window.kakao.maps.services.Status.OK) setAddress(res[0].address.address_name);
           });
+          // 로드뷰가 열려있으면 위치 업데이트
+          if (roadviewRef.current && roadviewClientRef.current) {
+            roadviewClientRef.current.getNearestPanoId(pos, 50, (panoId) => {
+              if (panoId) roadviewRef.current.setPanoId(panoId, pos);
+              else alert("해당 위치 근처 로드뷰를 찾을 수 없습니다.");
+            });
+          }
         });
 
         mapRef.current = map;
@@ -585,6 +601,16 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                     <div style={styles.label}>주차선 판독</div>
                     <div style={textStyle}>{result.line || "업로드 된 사진 없음"}</div>
                   </div>
+                  {result.imagePath && (
+                    <div style={cardStyle}>
+                      <div style={styles.label}>업로드한 사진</div>
+                      <img
+                        src={`${BASE_URL}${result.imagePath}`}
+                        alt="분석 이미지"
+                        style={{ width: "100%", borderRadius: 10, marginTop: 6, objectFit: "cover" }}
+                      />
+                    </div>
+                  )}
                 </>
               );
             })()}
