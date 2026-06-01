@@ -40,6 +40,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
   const [parkingSortType, setParkingSortType] = useState("distance");
   const [showParkingMarkers, setShowParkingMarkers] = useState(false);
   const [showRoadview, setShowRoadview] = useState(false);
+  const [imageSource, setImageSource] = useState(null); // "camera" | "gallery" | null
 
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -301,6 +302,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       setResult(newResult);
       setImage(null);
       setImageFile(null);
+      setImageSource(null);
       setHistory([
         { address, date: new Date().toLocaleDateString(), result: newResult.status, type: newResult.type, probability: newResult.probability, time: newResult.time, zone: newResult.zone, line: newResult.line, lat: currentLat, lng: currentLng, imagePath: newResult.imagePath || null },
         ...history,
@@ -394,25 +396,25 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       <div style={styles.uploadRow}>
         <div
           style={{ ...styles.uploadBox, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "opacity 0.15s" }}
-          onClick={() => cameraInputRef.current.click()}
+          onClick={() => { setImageSource("camera"); cameraInputRef.current.click(); }}
           onMouseEnter={e => e.currentTarget.style.opacity = "0.75"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}
           onMouseDown={e => e.currentTarget.style.opacity = "0.5"}
           onMouseUp={e => e.currentTarget.style.opacity = "0.75"}
         >
           <MdCameraAlt size={16} color={theme.accent} />
-          <span>카메라 촬영</span>
+          <span>{imageSource === "camera" && image ? "재촬영" : "카메라 촬영"}</span>
         </div>
         <div
           style={{ ...styles.uploadBox, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "opacity 0.15s" }}
-          onClick={() => fileInputRef.current.click()}
+          onClick={() => { setImageSource("gallery"); fileInputRef.current.click(); }}
           onMouseEnter={e => e.currentTarget.style.opacity = "0.75"}
           onMouseLeave={e => e.currentTarget.style.opacity = "1"}
           onMouseDown={e => e.currentTarget.style.opacity = "0.5"}
           onMouseUp={e => e.currentTarget.style.opacity = "0.75"}
         >
           <MdPhotoLibrary size={16} color={theme.accent} />
-          <span>갤러리 업로드</span>
+          <span>{imageSource === "gallery" && image ? "다른 사진 선택" : "갤러리 업로드"}</span>
         </div>
       </div>
 
@@ -517,7 +519,20 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       )}
 
       {/* 갤러리 업로드 이미지 미리보기 */}
-      {image && <img src={image} alt="preview" style={{ width: "100%", borderRadius: 10, marginBottom: 12 }} />}
+      {image && (
+        <div style={{ position: "relative", marginBottom: 12 }}>
+          <img src={image} alt="preview" style={{ width: "100%", borderRadius: 10, display: "block" }} />
+          <div
+            onClick={() => { setImage(null); setImageFile(null); setImageSource(null); }}
+            style={{
+              position: "absolute", top: 8, right: 8,
+              background: "rgba(0,0,0,0.6)", borderRadius: "50%",
+              width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: "#fff", fontSize: 16, fontWeight: 700,
+            }}
+          >✕</div>
+        </div>
+      )}
 
       {/* 분석/재분석 버튼 */}
       <button
@@ -538,7 +553,6 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       </button>      
 
       {/* 분석 결과 */}
-      {result && console.log("메인 imagePath:", result.imagePath)}
       {result && (
         <div style={styles.resultCard}>
           <div style={styles.rowBetween}>
