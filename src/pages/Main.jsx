@@ -220,15 +220,19 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
     if (probability <= 80) return { bg: "rgba(230,126,34,0.1)", border: "1px solid rgba(230,126,34,0.25)", text: "#E67E22" };
     return { bg: "rgba(231,77,60,0.1)", border: "1px solid rgba(231,77,60,0.25)", text: "#E74D3C" };
   };
-  const handleScreenshot = async (containerId) => {
+  const handleScreenshot = (containerId) => {
     const container = document.getElementById(containerId);
     if (!container) return;
     try {
-      const html2canvas = (await import("https://esm.sh/html2canvas@1.4.1")).default;
-      const canvas = await html2canvas(container, { useCORS: true, allowTaint: true });
-      // 4:3 가로 비율로 크롭
+      // 로드뷰 컨테이너 안의 canvas 태그 직접 찾기
+      const canvas = container.querySelector("canvas");
+      if (!canvas) {
+        alert("로드뷰 화면을 찾을 수 없습니다. 잠시 후 다시 시도해주세요.");
+        return;
+      }
       const srcW = canvas.width;
       const srcH = canvas.height;
+      // 4:3 가로 비율로 크롭
       const targetRatio = 4 / 3;
       let cropW = srcW;
       let cropH = Math.round(srcW / targetRatio);
@@ -487,7 +491,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
               <div
                 style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
                 onClick={() => handleScreenshot("roadview")}
-              >📷 스크린샷</div>
+              ><MdCameraAlt size={14} color="#fff" /></div>
               <div
                 style={{ background: "rgba(0,0,0,0.5)", borderRadius: 6, padding: "4px 8px", cursor: "pointer", color: "#fff", fontSize: 12 }}
                 onClick={() => {
@@ -538,7 +542,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                 <div
                   style={{ background: "rgba(0,0,0,0.6)", borderRadius: 8, padding: "6px 12px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600 }}
                   onClick={() => handleScreenshot("roadview-full")}
-                >📷 스크린샷</div>
+                ><MdCameraAlt size={16} color="#fff" /></div>
                 <div
                   style={{ background: "rgba(0,0,0,0.6)", borderRadius: 8, padding: "6px 12px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600 }}
                   onClick={() => setShowRoadview(true)}
