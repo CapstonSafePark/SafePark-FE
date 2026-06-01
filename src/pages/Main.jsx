@@ -548,6 +548,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       </button>      
 
       {/* 분석 결과 */}
+      {result && console.log("imagePath 확인:", result.imagePath)}
       {result && (
         <div style={styles.resultCard}>
           <div style={styles.rowBetween}>
