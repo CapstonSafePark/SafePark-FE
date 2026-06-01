@@ -12,6 +12,8 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
   const [newPassword, setNewPassword] = useState("");
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     const fetchMyInfo = async () => {
@@ -49,6 +51,8 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
     }
 
     if (currentPassword.trim() && newPassword.trim()) {
+      if (newPassword.length < 8) return alert("새 비밀번호는 8자 이상이어야 합니다.");
+      if (newPassword !== confirmPassword) return alert("새 비밀번호가 일치하지 않습니다.");
       try {
         const pwResponse = await changePassword(user.id, currentPassword, newPassword);
         const pwData = await pwResponse.json();
@@ -61,6 +65,7 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
 
     setCurrentPassword("");
     setNewPassword("");
+    setConfirmPassword("");
     setIsEditing(false);
   };
 
@@ -68,6 +73,7 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
     setEditForm({ name: user?.name || "", email: user?.email || "", phone: user?.phone || "" });
     setCurrentPassword("");
     setNewPassword("");
+    setConfirmPassword("");
     setIsEditing(false);
   };
 
@@ -111,7 +117,7 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
           {[
             { mode: "light", label: "라이트 모드", icon: <MdLightMode size={16} color={themeMode === "light" ? theme.accent : theme.textMuted} /> },
             { mode: "dark", label: "다크 모드", icon: <MdDarkMode size={16} color={themeMode === "dark" ? theme.accent : theme.textMuted} /> },
-            { mode: "system", label: "현재 기기 설정", icon: <MdSettingsBrightness size={16} color={themeMode === "system" ? theme.accent : theme.textMuted} /> },
+            { mode: "system", label: "기기 설정", icon: <MdSettingsBrightness size={16} color={themeMode === "system" ? theme.accent : theme.textMuted} /> },
           ].map(({ mode, label, icon }, i, arr) => (
             <div
               key={mode}
@@ -166,12 +172,12 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
                 <input style={styles.input} value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
               </div>
               <div>
-                <div style={styles.label}>이메일</div>
-                <input style={styles.input} value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
-              </div>
-              <div>
                 <div style={styles.label}>전화번호</div>
                 <input style={styles.input} value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+              </div>
+              <div>
+                <div style={styles.label}>이메일</div>
+                <input style={styles.input} value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
               </div>
               <div>
                 <div style={styles.label}>현재 비밀번호</div>
@@ -194,7 +200,7 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
                   <input
                     style={{ ...styles.input, paddingRight: 40 }}
                     type={showNew ? "text" : "password"}
-                    placeholder="새 비밀번호 입력"
+                    placeholder="새 비밀번호 (8자 이상)"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
@@ -202,6 +208,30 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
                     {showNew ? <AiOutlineEyeInvisible size={18} color={theme.textMuted} /> : <AiOutlineEye size={18} color={theme.textMuted} />}
                   </span>
                 </div>
+                {newPassword.length > 0 && newPassword.length < 8 && (
+                  <div style={{ fontSize: 11, color: theme.danger, marginTop: 4 }}>비밀번호는 8자 이상이어야 합니다.</div>
+                )}
+              </div>
+              <div>
+                <div style={styles.label}>새 비밀번호 확인</div>
+                <div style={{ position: "relative" }}>
+                  <input
+                    style={{ ...styles.input, paddingRight: 40 }}
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="새 비밀번호 재입력"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <span onClick={() => setShowConfirm(!showConfirm)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", cursor: "pointer" }}>
+                    {showConfirm ? <AiOutlineEyeInvisible size={18} color={theme.textMuted} /> : <AiOutlineEye size={18} color={theme.textMuted} />}
+                  </span>
+                </div>
+                {confirmPassword.length > 0 && newPassword !== confirmPassword && (
+                  <div style={{ fontSize: 11, color: theme.danger, marginTop: 4 }}>비밀번호가 일치하지 않습니다.</div>
+                )}
+                {confirmPassword.length > 0 && newPassword === confirmPassword && newPassword.length >= 8 && (
+                  <div style={{ fontSize: 11, color: theme.safe, marginTop: 4 }}>비밀번호가 일치합니다.</div>
+                )}
               </div>
               <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
                 <button style={styles.detailBtn} onClick={handleSave}>저장</button>
@@ -215,12 +245,12 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
                 <span style={styles.infoValue}>{user?.name}</span>
               </div>
               <div style={styles.infoRow}>
-                <span style={styles.label}>이메일</span>
-                <span style={styles.infoValue}>{user?.email}</span>
-              </div>
-              <div style={styles.infoRow}>
                 <span style={styles.label}>전화번호</span>
                 <span style={styles.infoValue}>{user?.phone || "-"}</span>
+              </div>
+              <div style={styles.infoRow}>
+                <span style={styles.label}>이메일</span>
+                <span style={styles.infoValue}>{user?.email}</span>
               </div>
               <div style={styles.infoRow}>
                 <span style={styles.label}>비밀번호</span>
