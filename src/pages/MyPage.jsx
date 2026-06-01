@@ -225,7 +225,7 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
           style={styles.smallBtn}
           onClick={handleLogout}
           onMouseEnter={e => { e.currentTarget.style.background = theme.accent; e.currentTarget.style.color = "#fff"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = theme.smallBtnBg; e.currentTarget.style.color = theme.textPrimary; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = theme.accent; }}
           onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
           onMouseUp={e => e.currentTarget.style.opacity = "1"}
         >

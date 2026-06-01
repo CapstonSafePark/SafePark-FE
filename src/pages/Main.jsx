@@ -378,7 +378,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
       {/* 현재 위치 카드 */}
       <div style={styles.locationCard}>
         <div style={{ fontSize: 10, color: theme.accent }}>현재 위치</div>
-        <div style={{ fontSize: 12, color: theme.textPrimary, fontWeight: "600" }}>{address}</div>
+        <div style={{ fontSize: 12, color: theme.textSecondary, fontWeight: "600" }}>{address}</div>
       </div>
 
       {/* 파일 입력 */}
