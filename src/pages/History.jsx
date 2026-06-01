@@ -27,6 +27,7 @@ export default function History({ setPage, history, setHistory, setResult }) {
                 time: h.riskLevel === "HIGH" ? "07:00 - 22:00" : h.riskLevel === "MEDIUM" ? "일부 시간대 단속" : "단속 없음",
                 zone: h.riskLevel === "HIGH" ? "주정차 금지구역" : h.riskLevel === "MEDIUM" ? "주의 구역" : "일반 구역",
                 line: "-",
+                imagePath: h.imagePath || null,
               };
             });
             setHistory(fallbackLogs);
@@ -54,6 +55,7 @@ export default function History({ setPage, history, setHistory, setResult }) {
                     time: h.riskLevel === "HIGH" ? "07:00 - 22:00" : h.riskLevel === "MEDIUM" ? "일부 시간대 단속" : "단속 없음",
                     line: h.lineColor || "-",
                     zone: h.reasoning ? h.reasoning : (h.riskLevel === "HIGH" ? "주정차 금지구역" : h.riskLevel === "MEDIUM" ? "주의 구역" : "일반 구역"),
+                    imagePath: h.imagePath || null,
                   });
                 });
               })
@@ -123,7 +125,7 @@ export default function History({ setPage, history, setHistory, setResult }) {
               <button
                 style={styles.detailBtn}
                 onClick={() => {
-                  setResult({ probability: h.probability, status: h.result, type: h.type, line: h.line, time: h.time, zone: h.zone, address: h.address, lat: h.lat, lng: h.lng });
+                  setResult({ probability: h.probability, status: h.result, type: h.type, line: h.line, time: h.time, zone: h.zone, address: h.address, lat: h.lat, lng: h.lng, imagePath: h.imagePath || null });
                   setPage("historyDetail");
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = theme.accent; e.currentTarget.style.color = "#fff"; }}
