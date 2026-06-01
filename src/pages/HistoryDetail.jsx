@@ -205,9 +205,14 @@ export default function HistoryDetail({ setPage, result }) {
                 </div>
                 <div style={cardStyle}>
                   <div style={styles.label}>분석 근거</div>
-                  <div style={textStyle}>
-                    {result.zone?.split(". ").map((sentence, i, arr) => (
-                      <span key={i}>{sentence}{i < arr.length - 1 ? "." : ""}<br /></span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4 }}>
+                    {result.zone?.split(". ").filter(s => s.trim()).map((sentence, i, arr) => (
+                      <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
+                        <span style={{ color: c.text, fontSize: 10, marginTop: 3, flexShrink: 0 }}>•</span>
+                        <span style={{ ...textStyle, fontSize: 12, lineHeight: "1.5" }}>
+                          {sentence}{i < arr.length - 1 ? "." : ""}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </div>
