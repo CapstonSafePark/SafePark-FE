@@ -14,9 +14,9 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
   const getParkingStyles = () => ({
     lotCard: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: `1px solid ${theme.border}` },
-    lotLeft: { display: "flex", alignItems: "center", gap: 12 },
-    lotIcon: { width: 36, height: 36, borderRadius: 10, background: `rgba(79,142,247,0.15)`, color: theme.accent, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16 },
-    lotName: { fontSize: 13, fontWeight: 600, marginBottom: 2, color: theme.textPrimary },
+    lotLeft: { display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 },
+    lotIcon: { width: 36, height: 36, borderRadius: 10, background: `rgba(79,142,247,0.15)`, color: theme.accent, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 16, flexShrink: 0 },
+    lotName: { fontSize: 13, fontWeight: 600, marginBottom: 2, color: theme.textPrimary, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", lineHeight: "1.4" },
     lotInfo: { fontSize: 11, color: theme.textMuted, marginBottom: 4 },
     lotBadge: { display: "inline-block", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 600 },
     lotPrice: { textAlign: "right" },
@@ -631,7 +631,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                     </div>
                   </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
                   <div style={{ ...parkingStyles.priceText, textAlign: "right", fontSize: 11, lineHeight: "1.5" }}>
                     {isFree ? "무료" : lot.feeUnit && lot.lotPrice ? `기본 ${lot.feeUnit}분 ${Number(lot.lotPrice).toLocaleString()}원` : "요금 정보 없음"}
                   </div>
