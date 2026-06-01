@@ -623,7 +623,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
               <div key={lot.lotId ?? `${lot.lotName}-${lot.distanceKm}`} style={parkingStyles.lotCard}>
                 <div style={parkingStyles.lotLeft}>
                   <div style={parkingStyles.lotIcon}>P</div>
-                  <div>
+                  <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={parkingStyles.lotName}>{lot.lotName}</div>
                     <div style={parkingStyles.lotInfo}>{lot.distanceKm ? (lot.distanceKm * 1000).toFixed(0) + "m" : "거리 정보 없음"}</div>
                     <div style={{ ...parkingStyles.lotBadge, background: isFree ? "rgba(46,204,113,0.15)" : "rgba(79,142,247,0.15)", color: isFree ? "#2ECC71" : theme.accent, border: isFree ? "1px solid rgba(46,204,113,0.3)" : "1px solid rgba(79,142,247,0.3)" }}>
