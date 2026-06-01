@@ -111,7 +111,7 @@ export default function MyPage({ setPage, user, setUser, setHistory }) {
           {[
             { mode: "light", label: "라이트 모드", icon: <MdLightMode size={16} color={themeMode === "light" ? theme.accent : theme.textMuted} /> },
             { mode: "dark", label: "다크 모드", icon: <MdDarkMode size={16} color={themeMode === "dark" ? theme.accent : theme.textMuted} /> },
-            { mode: "system", label: "기기 설정", icon: <MdSettingsBrightness size={16} color={themeMode === "system" ? theme.accent : theme.textMuted} /> },
+            { mode: "system", label: "현재 기기 설정", icon: <MdSettingsBrightness size={16} color={themeMode === "system" ? theme.accent : theme.textMuted} /> },
           ].map(({ mode, label, icon }, i, arr) => (
             <div
               key={mode}

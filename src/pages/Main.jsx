@@ -356,6 +356,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
               if (mapRef.current && markerRef.current && realLat && realLng) {
                 const moveLatLon = new window.kakao.maps.LatLng(realLat, realLng);
                 mapRef.current.setCenter(moveLatLon);
+                mapRef.current.setLevel(3);
                 markerRef.current.setPosition(moveLatLon);
                 setCurrentLat(realLat);
                 setCurrentLng(realLng);
