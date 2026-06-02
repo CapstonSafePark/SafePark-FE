@@ -104,10 +104,10 @@ export default function History({ setPage, history, setHistory, setResult }) {
           <div style={styles.title}>분석 이력</div>
           {history.length > 0 && (
             <button
-              style={{ ...styles.deleteBtn, padding: "4px 10px", fontSize: 11, marginTop: 0 }}
+              style={{ padding: "4px 10px", fontSize: 11, borderRadius: 8, border: `1px solid ${theme.danger}`, background: "rgba(231,77,60,0.12)", color: theme.danger, cursor: "pointer", fontWeight: 600, transition: "background 0.15s, color 0.15s" }}
               onClick={handleDeleteAllHistory}
               onMouseEnter={e => { e.currentTarget.style.background = theme.danger; e.currentTarget.style.color = "#fff"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = theme.danger; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(231,77,60,0.12)"; e.currentTarget.style.color = theme.danger; }}
               onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
               onMouseUp={e => e.currentTarget.style.opacity = "1"}
             >전체 삭제</button>
