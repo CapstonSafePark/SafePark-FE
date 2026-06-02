@@ -139,7 +139,7 @@ export default function History({ setPage, history, setHistory, setResult }) {
                   setPage("historyDetail");
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = theme.accent; e.currentTarget.style.color = "#fff"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = theme.accent; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(79,142,247,0.12)"; e.currentTarget.style.color = theme.accent; }}
                 onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
                 onMouseUp={e => e.currentTarget.style.opacity = "1"}
               >
@@ -149,7 +149,7 @@ export default function History({ setPage, history, setHistory, setResult }) {
                 style={styles.deleteBtn}
                 onClick={() => handleDeleteHistory(h.id)}
                 onMouseEnter={e => { e.currentTarget.style.background = theme.danger; e.currentTarget.style.color = "#fff"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = theme.danger; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(231,77,60,0.12)"; e.currentTarget.style.color = theme.danger; }}
                 onMouseDown={e => e.currentTarget.style.opacity = "0.7"}
                 onMouseUp={e => e.currentTarget.style.opacity = "1"}
               >
