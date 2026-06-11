@@ -199,12 +199,7 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
 
   const formatReasoning = (reasoning) => {
     if (!reasoning) return "-";
-    const zoneMatch = reasoning.match(/반경 내 단속구역 [^.]*/);
-    const zone = zoneMatch ? zoneMatch[0] : "";
-    const probMatch = reasoning.match(/과태료 확률: (\d+)%/);
-    const prob = probMatch ? `과태료 확률 ${probMatch[1]}%` : "";
-    const result = [zone, prob].filter(Boolean).join(" / ");
-    return result || reasoning;
+    return reasoning;
   };
 
   const getEmoji = (probability) => {
@@ -280,23 +275,30 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
           "황색이중선": "황색 이중선", "황색단선": "황색 단선", "백색점선": "백색 점선", "없음": "차선 감지 불가",
         };
         const lineText = data.lineColor ? (lineColorMap[data.lineColor] || data.lineColor) : null;
+        const isAbsoluteBan = data.zoneType === "버스정류장" || data.zoneType === "스쿨존";
+        const timeText = isAbsoluteBan ? "24시간 단속" : (data.startTime && data.endTime ? `${data.startTime} - ${data.endTime}` : data.riskLevel === "HIGH" ? "07:00 - 22:00" : data.riskLevel === "MEDIUM" ? "일부 시간대 단속" : "단속 없음");
+        const timeBadge = null;
         if (data.riskLevel === "HIGH") {
-          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: lineText, time: "07:00 - 22:00", zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: lineText, time: timeText, timeBadge, zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
         } else if (data.riskLevel === "MEDIUM") {
-          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: lineText, time: "일부 시간대 단속", zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
+          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: lineText, time: timeText, timeBadge, zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
         } else {
-          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: lineText, time: "단속 없음", zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
+          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: lineText, time: timeText, timeBadge, zone: formatReasoning(data.reasoning), imagePath: data.imagePath };
         }
       } else {
         const checkResponse = await checkParking(lat, lng);
         const checkData = await checkResponse.json();
         const data = checkData.data;
+        const nearestZone = data.nearbyZones?.[0];
+        const isAbsoluteBanCheck = data.zoneType === "버스정류장" || data.zoneType === "스쿨존";
+        const timeText = isAbsoluteBanCheck ? "24시간 단속" : (data.startTime && data.endTime ? `${data.startTime} - ${data.endTime}` : data.riskLevel === "HIGH" ? "07:00 - 22:00" : data.riskLevel === "MEDIUM" ? "일부 시간대 단속" : "단속 없음");
+        const timeBadge = null;
         if (data.riskLevel === "HIGH") {
-          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: "07:00 - 22:00 단속", zone: formatReasoning(data.reasoning) };
+          newResult = { probability: data.probability, status: "위험 · 주차 불가", type: "danger", line: null, time: timeText, timeBadge, zone: formatReasoning(data.reasoning) };
         } else if (data.riskLevel === "MEDIUM") {
-          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: "단속 없음", zone: formatReasoning(data.reasoning) };
+          newResult = { probability: data.probability, status: "주의 · 주차 가능", type: "warning", line: null, time: timeText, timeBadge, zone: formatReasoning(data.reasoning) };
         } else {
-          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: "단속 없음", zone: formatReasoning(data.reasoning) };
+          newResult = { probability: data.probability, status: "주차 가능", type: "safe", line: null, time: timeText, timeBadge, zone: formatReasoning(data.reasoning) };
         }
       }
       setResult(newResult);
@@ -587,7 +589,9 @@ export default function Main({ setPage, history, setHistory, result, setResult, 
                 <>
                   <div style={cardStyle}>
                     <div style={styles.label}>단속 시간대</div>
-                    <div style={textStyle}>{result.time}</div>
+                    <div style={textStyle}>
+                      {result.time}{result.timeBadge ? ` (${result.timeBadge})` : ""}
+                    </div>
                   </div>
                   <div style={cardStyle}>
                     <div style={styles.label}>분석 근거</div>
