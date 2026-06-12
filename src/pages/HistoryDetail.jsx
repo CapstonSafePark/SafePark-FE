@@ -54,7 +54,33 @@ export default function HistoryDetail({ setPage, result }) {
     const container = document.getElementById("detail-map");
     if (!container) return;
     const moveLatLon = new window.kakao.maps.LatLng(lat, lng);
-    const map = new window.kakao.maps.Map(container, { center: moveLatLon, level: 3 });
+    const map = new window.kakao.maps.Map(container, { center: moveLatLon, level: 3, draggable: true });
+
+    container.addEventListener("dragstart", (e) => e.preventDefault());
+
+    let touchStartX = 0, touchStartY = 0;
+    container.addEventListener("touchstart", (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      map.setDraggable(false);
+    }, { passive: true });
+    container.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStartX;
+      const dy = touch.clientY - touchStartY;
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      const proj = map.getProjection();
+      const center = map.getCenter();
+      const pt = proj.containerPointFromCoords(center);
+      map.setCenter(proj.coordsFromContainerPoint(
+        new window.kakao.maps.Point(pt.x - dx, pt.y - dy)
+      ));
+    }, { passive: false });
+    const restoreDraggable = () => map.setDraggable(true);
+    container.addEventListener("touchend", restoreDraggable);
+    container.addEventListener("touchcancel", restoreDraggable);
     const marker = new window.kakao.maps.Marker({ position: moveLatLon });
     marker.setMap(map);
     mapRef.current = map;
